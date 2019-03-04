@@ -22,13 +22,13 @@ COPY ./ ./
 
 # Add deploy key to get deps
 RUN mkdir -p ~/.ssh
-ARG SSH_PRIVATE_KEY
-RUN echo "${SSH_PRIVATE_KEY}" > ~/.ssh/id_rsa && \
-    chmod 600 ~/.ssh/id_rsa
+#ARG SSH_PRIVATE_KEY
+#RUN echo "${SSH_PRIVATE_KEY}" > ~/.ssh/id_rsa && \
+#    chmod 600 ~/.ssh/id_rsa
 
 # Add hosts keys to get deps
 RUN ssh-keyscan github.com >> ~/.ssh/known_hosts
-RUN git config --global --add url."git@github.com:".insteadOf "https://github.com/"
+#RUN git config --global --add url."git@github.com:".insteadOf "https://github.com/"
 
 # get deps for both components
 RUN go get github.com/teamdigitale/anpr-dashboard-server/server
