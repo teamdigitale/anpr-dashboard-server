@@ -1,0 +1,65 @@
+{{define "main"}}
+  <div class="u-layout-wide u-layoutCenter u-text-r-l u-margin-r-bottom u-layout-r-withGutter">
+    
+  <!-- <div class="u-background-grey-20 u-text-r-xxl u-padding-r-top u-padding-r-bottom">-->
+    <div class="u-layout-wide u-layoutCenter u-layout-r-withGutter">
+      <div class="u-layout-centerContent u-padding-r-bottom">
+  <section class="u-layout-wide">
+    <div class="Grid Grid--withGutter">
+      <div class="Grid-cell Card u-md-size1of4 u-lg-size1of4 u-padding-r-left">
+        <div class="u-padding-right-xxl u-padding-r-all" id="sidebar">
+          <!-- Versione: <span id="version">{{if .vcs.Tag}}{{ .vcs.Tag}}{{else}}bozza{{end}}</span></br> -->
+          {{if .vcs.Repository}}Repository: <a href="{{ .vcs.Repository }}">{{ .vcs.Repository }}</a></br>{{end}}
+          {{if .properties.Contacts}}
+          <h2>Contatti</h2>
+          <ul id="contacts">{{range $index, $element := .properties.Contacts}}<li><a href="mailto:{{ $element }}">{{ $element }}</a></li>{{end}}</ul>
+          {{end}}
+
+          <h2>Indice</h2>
+          <div>
+            {{ .index }}
+          </div>
+        </div>
+      </div>
+
+      <div class="u-border-left-xxs u-layout-wide u-layout-center u-layout-withGutter Grid-cell Grid--withGutter u-md-size2of4 u-lg-size2of4">
+       <article class="Prose">
+    {{ .content }}
+       </article>
+      </div>
+
+    </div>
+
+  </section>
+</div>
+
+    </div>
+  </div>
+
+  <div class="u-background-grey-80 u-hiddenPrint">
+    <div class="u-layout-wide u-layoutCenter u-layout-r-withGutter">
+      <footer class="Footer u-padding-all-s">
+        <ul class="Footer-links u-cf">
+          <li><a href="" title="Privacy policy">Privacy</a></li>
+          <li><a href="" title="Note legali">Note legali</a></li>
+          <li><a href="" title="Dati monitoraggio sito">Contatti</a></li>
+        </ul>
+      </footer>
+    </div>
+  </div>
+
+  <a href="#" title="torna all'inizio del contenuto" class="ScrollTop js-scrollTop js-scrollTo">
+    <i class="ScrollTop-icon Icon-arrow-up" aria-hidden="true"></i>
+    <span class="u-hiddenVisually">torna all'inizio del contenuto</span>
+  </a>
+
+  <div id="cookie-bar" class="CookieBar js-CookieBar u-background-95 u-padding-r-all" aria-hidden="true">
+    <p class="u-color-white u-text-r-xs u-lineHeight-m u-padding-r-bottom">Questo sito utilizza cookie tecnici, analytics e di terze parti.
+      <br>Proseguendo nella navigazione accetti l’utilizzo dei cookie.<br>
+    </p>
+    <p>
+      <button class="Button Button--default u-text-r-xxs js-cookieBarAccept u-inlineBlock u-margin-r-all">Accetto</button>
+      <a href="" class="u-text-r-xs u-color-teal-50">Privacy policy</a>
+    </p>
+  </div>
+{{end}}

@@ -1,0 +1,10 @@
+goospel
+server
+*icloud
+tags
+*.swp
+*creds.json
+*creds.yaml
+*DatiCheckList.xml
+*AnomalieSchedeSoggettoPreSubV.2.xml
+tmp

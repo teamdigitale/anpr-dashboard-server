@@ -1,0 +1,70 @@
+Exporting prometheus metrics:
+https://github.com/prometheus/client_golang/blob/master/examples/random/main.go
+
+Middleware for gin:
+https://github.com/zalando/gin-oauth2
+
+Middleware for gin exporting to prometheus:
+https://github.com/mcuadros/go-gin-prometheus
+https://github.com/DanielHeckrath/gin-prometheus
+
+hubhubhub:
+https://github.com/pubsubhubbub/gohubbub/blob/master/example/example.go
+
+
+PSEUDO CODE
+===========
+
+1) Register a few URLs
+2) Register a 404 handler
+3) 404 handler uses a dict of urls to decide what to do:
+  a) Send a redirect to some programmed page.
+  b) Display a Markdown file.
+  c) 404 page - has a login option.
+     - if enough privileges, Display interface to add a link.
+     - if enough privileges, may display a page that has not been published yet.
+
+
+GIT PAGES
+=========
+1) All git repositories go in one folder
+2) Periodically, all folders are scanned for README.md files, or INDEX.md
+3) Based on path of file, an URL is computed.
+4) Any directory between the top level directory and the file can contain a .goospel.yaml file
+
+_separately_
+
+1) A tool monitors the git repositories.
+2) Checks them out in a specific folder.
+3) Notifies the web interface of the update.
+
+
+INTERFACE
+=========
+1) On top right corner, display:
+   * [if-authorized] + button, to add a link or repository.
+   * [if-authorized] share button, to share a page with others, display current people with access.
+                     share button, standard social network share.
+   * login / logout
+   * some sort of admin page, showing state of repositories?
+     state of links? some statistics?
+
+SHARING WALKTHROUGH
+===================
+
+0) if document is public, just send an email.
+1) if document is private...
+  a) send email with token.
+  b) when page is reached, invite user to login or register (if not already).
+     once registered / logged in, let user see the page.
+     note that a token allows a single user to see the page.
+       So once a user is logged in, the page is added to its privileges,
+       and token is consumed.
+
+
+OAUTH WALKTHROUGH
+=================
+- is user authenticated? He should have a cookie if he is.
+
+
+

@@ -1,0 +1,93 @@
+{{define "main"}}
+  <section class="Grid">
+  <div class="Grid-cell u-sizeFull u-md-size1of2 u-lg-size1of2 u-text-r-s u-padding-r-all">
+    <div class="u-text-r-l u-layout-prose">
+      <h2 class="u-text-h2 u-margin-r-bottom">{{template "message" . }}</h2>
+      <p class="u-textSecondary u-lineHeight-l">
+        {{template "explanation" .}}
+      </p>
+    </div>
+  </div>
+
+  <div class="Grid-cell u-sizeFull u-md-size1of2 u-lg-size1of2 u-text-r-s u-padding-r-all">
+
+  <section class="Grid">
+      <!--
+  <div class="Grid-cell u-md-size1of2 u-lg-size1of2">
+      <a href='{{ .gauth }}' class="Button Spid-button u-text-r-xxs">
+        <img src="/static/google/google.svg" alt="" />
+        <span>Entra con Google</span>
+      </a>
+  </div>
+
+
+  <div class="Grid-cell u-md-size1of2 u-lg-size1of2">
+    <form name="spid_idp_access" action="#" method="post" class="Spid u-margin-bottom-xxl">
+
+      <input type="hidden" name="param_001" value="" />
+      <input type="hidden" name="param_002" value="" />
+      <input type="hidden" name="param_003" value="" />
+
+      <a href="#spid-button-post-xxs" data-menu-trigger="spid-button-post-xxs" class="Button Spid-button u-text-r-xxs">
+        <img src="/static/spid/spid-ico-circle-bb.svg" alt="" />
+        <span>Entra con SPID</span>
+      </a>
+      <div id="spid-button-post-xxs" data-menu class="Spid-menu Dropdown-menu">
+        <ul class="Linklist js-randomize">
+          
+          <li>
+            <button class="Spid-idp" tabindex="0">
+              <span class="u-hiddenVisually">Prosegui con Infocert ID</span>
+              <img src="/static/spid/spid-idp-infocertid.svg" alt="" class="u-text-r-xxs" />
+            </button>
+          </li>
+          
+          <li>
+            <button class="Spid-idp" tabindex="0">
+              <span class="u-hiddenVisually">Prosegui con TIM ID</span>
+              <img src="/static/spid/spid-idp-timid.svg" alt="" class="u-text-r-xxs" />
+            </button>
+          </li>
+          
+          <li>
+            <button class="Spid-idp" tabindex="0">
+              <span class="u-hiddenVisually">Prosegui con Poste ID</span>
+              <img src="/static/spid/spid-idp-posteid.svg" alt="" class="u-text-r-xxs" />
+            </button>
+          </li>
+          
+          <li>
+            <button class="Spid-idp" tabindex="0">
+              <span class="u-hiddenVisually">Prosegui con Sielte ID</span>
+              <img src="/static/spid/spid-idp-sielteid.svg" alt="" class="u-text-r-xxs" />
+            </button>
+          </li>
+          
+        </ul>
+      </div>
+    </form>
+  </div>
+      -->
+
+  <form class="Form Form--spaced u-padding-all-xs u-text-r-xs" action="{{ .eauth }}" id="loginform" method="post">
+  <fieldset class="Form-fieldset">
+    <legend class="Form-legend">Entra con EMAIL</legend>
+    <input id="cookie" name="cookie" value="{{ .ecookie }}" type="hidden">
+
+    <div class="Form-field">
+      <label class="Form-label is-required" for="loginemail">email</label>
+      <input class="Form-input u-text-r-s u-borderRadius-m" name="email" id="loginemail" type="email" style="display: inline-block;" aria-required="true" required>
+
+      <small id="logintext">Riceverai un link alla tua email per effettuare il login</small>
+    </div>
+  </fieldset>
+
+  <div class="Form-field Grid-cell u-textRight">
+    <button type="submit" id="loginsubmit" class="Button Button--default Button--shadow u-text-m">Invia</button>
+  </div>
+</form>
+
+
+  </div>
+  </section>
+{{end}}

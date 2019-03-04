@@ -1,0 +1,364 @@
+<!doctype html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+    <title>Comuni e Software House</title>
+
+    <link rel="stylesheet" href="bootstrap/css/bootstrap.min.css">
+    <meta name="description" content="Comuni e Software House - software anagrafico - ANPR">
+
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+      <script src="html5shiv/html5shiv.min.js"></script>
+      <script src="respond/respond.min.js"></script>
+    <![endif]-->
+
+    <style>
+       #map {
+        height: 900px;
+        width: 100%;
+       }
+    </style>
+  </head>
+
+<body>
+  <div class="container">
+
+    <div class="row">&nbsp;</div>
+
+    <div class="row">
+      <div class="col-md-6"><div id="map"></div></div>
+      <div class="col-md-6">
+
+              <div class="input-group">
+                <div class="input-group-btn search-panel">
+                    <button id="allbutton" type="button" class="btn btn-default">All</button>
+                    <button id="nonebutton" type="button" class="btn btn-default">None</button>
+                </div>
+
+                <input type="text" class="form-control" id="swhsearch" placeholder="Azienda o Comune">
+            </div>
+            <div id="stats"></div>
+
+            <div class="col-md-6">
+              <div><h4>Software Houses</h4></div>
+              <div>&nbsp;</div>
+              <div id="swh"></div>
+            </div>
+
+            <div class="col-md-6">
+              <div><h4 id="comunititle">Comuni</h4></div>
+              <div id="comuni"></div>
+            </div>
+
+      </div>
+    </div>
+  </div>
+
+  <script src="jquery/jquery.min.js"></script>
+  <script src="bootstrap/js/bootstrap.min.js"></script>
+  <script src="jsrender/jsrender.min.js"></script>
+
+  <script>
+      // Prints the number with the thousand separator.
+      function numberWithSeparator(x) {
+        if (x == null || x == undefined) return "";
+        return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+      }
+      $.views.tags("thousands", numberWithSeparator);
+
+      // This is used to create an object that represents a pin on the map.
+      // The pin has a window (iw) that pops up when clicked, and a marker,
+      // which is the symbol itself on the map.
+      function Pin() {
+        this.marker = null;
+        this.iw = null;
+        this.data = null;
+      }
+
+      // This is used to create an object that represents a Software House.
+      // Each Software House has a set of pins associated, an icon, and
+      // some data read from a json file.
+      var _swh_id = 1;
+      function Swh() {
+        var id = "" + _swh_id;
+        var pad = "000"
+        var id = pad.substring(0, pad.length - id.length) + id
+
+        this.pins = [];
+        this.icon = "./pins/mypin-" + id + ".png";
+        this.data = null;
+
+        _swh_id += 1;
+      }
+
+      function processComuni(map, data, swhs) {
+        var nowopen = null;
+        var template = $.templates(
+          "<h4>{{:Nome}} ({{:Provincia}}) - {{:Cap}}</h4>" +
+          "Popolazione: {{thousands Popolazione/}}, " + 
+          "Postazioni: {{:Postazioni}}<br>" +
+          "Referente: {{:NomeReferente}} {{:CognomeReferente}}<br>" +
+          "Telefono: {{:TelefonoReferente}} {{:CellulareReferente}}<br>" +
+          "Email: <a href='mailto:{{:EmailReferente}}'>{{:EmailReferente}}</a><br><br>" +
+          "{{:swh.data.Nome}}"
+        );
+
+        $.each(data, function (key, val) {
+          if (!val.Location) return;
+
+          var swh = swhs[val.IdAzienda];
+          if (swh == undefined) {
+            swh = swhs[val.IdAzienda] = new Swh(); 
+          }
+
+          var pin = new Pin();
+          swh.pins.push(pin);
+          val.swh = swh;
+          val.pin = pin;
+
+          pin.data = val;
+          pin.iw = new google.maps.InfoWindow({content: template.render(val)});
+          pin.marker = new google.maps.Marker({
+            position: val.Location,
+            title: val.Nome,
+            icon: swh.icon,
+            map: null
+          });
+          pin.marker.addListener('click', function() {
+            if (nowopen) nowopen.close();
+            pin.iw.open(map, pin.marker);
+            nowopen = pin.iw;
+          });
+        });
+
+        // Sort all pins in a software house by most popolus first.
+        $.each(swhs, function (key, swh) {
+          swh.pins.sort(function(a, b) { return b.data.Popolazione - a.data.Popolazione; });
+        });
+      }
+
+      var _markers_to_clear = [];
+      function displayComuni(swh, map, limit) {
+          var template = $.templates(
+            "<a data-toggle='collapse' data-parent='#comuni' href='#comune{{:localId}}' value='{{:localId}}'>" +
+            "{{:data.Nome}}{{if data.Provincia}}<small> ({{:data.Provincia}}) {{thousands data.Popolazione/}}</small>{{/if}}" +
+            "</a><br>" +
+            "{{if data.Provincia}}" +
+            "<div id='comune{{:localId}}' value='{{:localId}}' class='collapse' style='border-left: medium solid blue; padding-left: 5px;'>" +
+          "Postazioni: {{:data.Postazioni}}<br>" +
+          "Referente: {{:data.NomeReferente}} {{:data.CognomeReferente}}<br>" +
+          "Telefono: {{:data.TelefonoReferente}} {{:data.CellulareReferente}}<br>" +
+          "Email: <a href='mailto:{{:data.EmailReferente}}'>{{:data.EmailReferente}}</a><br>" +
+          "<b>{{:data.swh.data.Nome}}</b>{{/if}}" +
+            "</div>"
+          );
+
+          if (limit == undefined)
+            limit = 60;
+
+          if (swh.data && swh.data.Nome) {
+            $("#comunititle").html("Comuni <small>" + swh.data.Nome + "</small>");
+          } else {
+            $("#comunititle").html("Comuni");
+          }
+
+          var torender = swh.pins.slice(0, limit);
+          if (swh.pins.length > limit)
+            torender.push({data: { Nome: "..." } });
+
+          var html = "";
+          $.each(torender, function (k, v) {
+            v.localId = k;
+            html += template.render(v);
+          });
+          $("#comuni").html(html);
+          $.each(_markers_to_clear, function (k, v) {
+            v.setMap(null);
+          });
+          _markers_to_clear = [];
+
+          $("#comuni .collapse").on('show.bs.collapse', function () {
+            var id = $(this).attr("value");
+            var pin = torender[id];
+
+            if (pin.emarker) {
+              pin.emarker.setMap(null);
+            }
+
+            pin.emarker = new google.maps.Marker({
+              position: pin.data.Location,
+              title: pin.data.Nome,
+              // icon: pin.data.swh.icon,
+              map: map
+            });
+            // Note that this is not cleared on hide - but that's ok.
+            // Nothing bad will happen.
+            _markers_to_clear.push(pin.emarker);
+          });
+          $("#comuni .collapse").on('hide.bs.collapse', function () {
+            var id = $(this).attr("value");
+            var pin = torender[id];
+
+            if (pin.emarker) {
+              pin.emarker.setMap(null);
+            }
+          });
+      }
+
+      function processSWH(map, swdata, swhs, refreshStats) {
+        $.each(swdata, function (k, v) {
+          var swh = swhs[v.Id];
+          if (swh == undefined) {
+            swh = swhs[v.Id] = new Swh(); 
+          }
+
+          swhs[v.Id].data = v;
+        });
+
+        // swhs is indexed by Id of a software house. Make a copy, and sort it,
+        // for display purposes only.
+        sswhs = swhs.slice();
+        sswhs.sort(function(a, b) { return b.data.Comuni - a.data.Comuni; });
+
+        var template = $.templates(
+          "<div class='checkbox' style='margin-top: -5px;'>" +
+          "  <label>" +
+          "    <input type='checkbox' value='{{:data.Id}}'>" +
+          "    <img src='{{:icon}}' height='15'> {{:data.Nome}} ({{:data.Comuni}})" +
+          "  </label>" +
+          "</div>"
+        );
+        var html = template.render(sswhs);
+        $("#swh").html(html);
+
+        $("#allbutton").click(function () {
+           $("#swh input[type=checkbox]").prop("checked", true).trigger("change");
+        });
+        $("#nonebutton").click(function () {
+           $("#swh input[type=checkbox]").prop("checked", false).trigger("change");
+        });
+
+        $("#swh input[type=checkbox]").change(function (changed) {
+          var id = $(this).attr("value");
+          var swh = swhs[id];
+          var checked = $(this).is(":checked");
+
+          $.each(swh.pins, function (k, v) {
+            if (checked) {
+              v.marker.setMap(map);
+            } else {
+              v.marker.setMap(null);
+            }
+          });
+
+          refreshStats();
+        });
+        $("#swh div.checkbox").mouseover(function (element) {
+          // var id = $(this).attr("value");
+          var id = $(this).find("input[type=checkbox]").attr("value");
+          var swh = swhs[id];
+
+          displayComuni(swh, map);
+        });
+        refreshStats();
+      }
+
+      function initMap() {
+        var rome = {lat: 41.9028, lng: 12.4964};
+        var map = new google.maps.Map(document.getElementById('map'), {
+          zoom: 6,
+          center: rome
+        });
+
+        var swhs = [];
+        $.getJSON("aziende.json", function (swdata) {
+          var total_cities = 0; 
+          var total_citizens = 0;
+          var refreshStats = function () {
+            var template = $.templates(
+              "comuni: {{thousands total_cities/}}{{if covered_cities}} ({{:covered_cities}}% coperto){{/if}}, " +
+              "cittadini: {{thousands total_citizens/}}{{if covered_citizens}} ({{:covered_citizens}}% coperto){{/if}}");
+
+            var covered_cities = 0;
+            var covered_citizens = 0;
+            $.each($("#swh input:checked[type=checkbox]"), function (k, v) {
+              var id = $(this).attr("value");
+              var swh = swhs[id];
+
+              covered_cities += swh.pins.length;
+              $.each(swh.pins, function (pk, pv) {
+                covered_citizens += pv.data.Popolazione;
+              });
+            });
+
+            var html;
+            if (covered_citizens || covered_cities) {
+              covered_citizens = (covered_citizens * 100) / total_citizens;
+              covered_cities = (covered_cities * 100) / total_cities;
+              html = template.render({total_citizens: total_citizens, total_cities: total_cities, covered_cities: covered_cities.toFixed(2), covered_citizens: covered_citizens.toFixed(2)});
+            } else {
+              html = template.render({total_citizens: total_citizens, total_cities: total_cities});
+            }
+            $("#stats").html(html);
+          };
+
+          processSWH(map, swdata, swhs, refreshStats);
+
+
+          $.getJSON("comuni.json", function (cdata) {
+            cdata.sort(function(a, b) { return b.Popolazione - a.Popolazione; });
+
+            processComuni(map, cdata, swhs);
+
+            $.each(swhs, function (k, v) {
+              total_cities += v.pins.length;
+              $.each(v.pins, function (pk, pv) {
+                total_citizens += pv.data.Popolazione;
+              });
+            });
+
+            $("#swhsearch").on("input", function (event) {
+              var query = $(this).val().trim().toLowerCase();
+
+              // Filter software houses.
+              $.each($("#swh div.checkbox"), function (k, v) {
+                var text = $(v).find("label").text().trim().toLowerCase();
+                if (text.indexOf(query) >= 0) {
+                  $(v).removeClass("hidden");
+                } else {
+                  $(v).addClass("hidden");
+                } 
+              });
+
+              // Prepare list of cities.
+              var found = 0;
+              var toshow = { pins: [] };
+              $.each(cdata, function (k, v) {
+                var text = v.Nome.trim().toLowerCase();
+                if (text.indexOf(query) >= 0) {
+                  toshow.pins.push(v.pin);
+                  found += 1;
+                  if (found >= 100)
+                    return false;
+                }
+              });
+
+              displayComuni(toshow, map);
+            });
+
+            refreshStats();
+          });
+        });
+      }
+  </script>
+
+  <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAeiSiYUyuNqaBGwsw3fzrDiNl-xGUaNQY&libraries=places&callback=initMap"></script>
+</body>
+</html>

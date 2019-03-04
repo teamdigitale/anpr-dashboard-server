@@ -1,0 +1,19 @@
+hostnames: ["dashboard.anpr.it"]
+options:
+  paths:
+    ../site/static:
+      viewers: ["map_viewers"]
+storageoptions:
+  databasepath: "/tmp/subentro.db"
+  fornitoriacls:
+    nome_fornitore:
+      readers: ["gruppo_a", "team_anpr"]
+      writers: ["gruppo_a"]
+groups:
+  - id: "map_viewers"
+    members: ["@teamdigitale.governo.it", "@agid.gov.it", "@sogei.it", "luca.bigliardi@gmail.com", "matteo.troia@camera.it", "coppola_p@camera.it", "guido.pera@gmail.com", "vincenzo.travascio@gmail.com", "e.gullo@palazzochigi.it", "elio.gullo@gmail.com", "v.guida975@gmail.com", "v.guida@ipzs.it", "a.antetomaso@ipzs.it"]
+  - id: "team_anpr"
+    apikeys: ["abracadabra"]
+    members: ["@teamdigitale.governo.it"]
+  - id: "gruppo_a"
+    members: ["foo@example.com", "bar@baz.it"]

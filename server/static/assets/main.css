@@ -1,0 +1,33 @@
+body {
+    background-color: #f6f9fc
+}
+
+.Header-titleLink a {
+    font-size: 1em !important
+}
+
+.Form-input {
+    width: auto
+}
+
+.Form-input.is-disabled {
+    cursor: not-allowed
+}
+
+.Form-input:focus+[role=tooltip].in-flex {
+    margin-top: 3em !important
+}
+
+.Form-input--upload {
+    position: relative;
+    overflow: hidden;
+    display: inline-block
+}
+
+.Form-input--upload input[type=file] {
+    font-size: 100px;
+    position: absolute;
+    left: 0;
+    top: 0;
+    opacity: 0
+}

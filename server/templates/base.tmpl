@@ -1,0 +1,144 @@
+{{ define "start" }}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+    <title>{{ .properties.Title }}</title>
+
+  <script type="text/javascript">
+    WebFontConfig = {
+      google: {
+        families: ['Titillium+Web:400,600,700,400italic:latin']
+      }
+    };
+    (function() {
+      var wf = document.createElement('script');
+      wf.src = 'https://ajax.googleapis.com/ajax/libs/webfont/1/webfont.js';
+      wf.type = 'text/javascript';
+      wf.async = 'true';
+      var s = document.getElementsByTagName('script')[0];
+      s.parentNode.insertBefore(wf, s);
+    })();
+  </script>
+
+  <script src="/static/ita/vendor/modernizr.js"></script>
+  <script src="/static/angular.min.js"></script>
+
+  <link media="all" rel="stylesheet" href="/static/bootstrap/css/bootstrap.min.css">
+  <link media="all" rel="stylesheet" href="/static/ita/vendor.css">
+  <link media="all" rel="stylesheet" href="/static/ita/build.css">
+  <link media="all" rel="stylesheet" href="/static/overrides.css">
+
+  <script src="/static/ita/vendor/jquery.min.js"></script>
+  <script src="/static/overrides.js"></script>
+
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+  </head>
+  <body class="t-Pac">
+
+<header class="Header Headroom--fixed js-Headroom u-hiddenPrint">
+
+  <div class="Header-banner">
+    <div class="Header-owner Headroom-hideme">
+      <a href="//developers.italia.it"><span>dashboard.anpr.it - Dashboard ANPR</span></a>
+    </div>
+  </div>
+
+  <div class="Header-navbar Grid Grid--alignMiddle">
+  <!--
+    <div class="Header-toggle Grid-cell">
+      <a class="Hamburger-toggleContainer js-fr-offcanvas-open u-nojsDisplayInlineBlock
+        " href="#menu"
+        aria-controls="menu" aria-label="accedi al menu" title="accedi al menu">
+        <span class="Hamburger-toggle" role="presentation"></span>
+        <span class="Header-toggleText" role="presentation">Menu</span>
+      </a>
+    </div>
+    -->
+
+    <div class="Header-logo Grid-cell" aria-hidden="true">
+      <a href="" tabindex="-1">
+        <img src="/static/logo-it.svg" height="75" width="80" alt="">
+      </a>
+    </div>
+
+    <div class="Header-title Grid-cell">
+      <h1 class="Header-titleLink">
+        <a href="/">
+          {{ .properties.Title }}<br>
+          <small>{{ .properties.Subtitle }}</small>
+        </a>
+      </h1>
+    </div>
+
+  </div><!-- Header-navbar -->
+
+</header>
+
+        <!--
+<section class="Offcanvas Offcanvas--left Offcanvas--modal js-fr-offcanvas u-jsVisibilityHidden u-nojsDisplayNone u-hiddenPrint" id="menu" style="visibility: hidden;">
+	<h2 class="u-hiddenVisually">Menu di navigazione</h2>
+
+  <div class="Offcanvas-content u-background-white">
+    <div class="Offcanvas-toggleContainer u-background-70 u-jsHidden">
+      <a class="Hamburger-toggleContainer u-block u-color-white u-padding-bottom-xxl u-padding-left-s u-padding-top-xxl js-fr-offcanvas-close"
+        aria-controls="menu" aria-label="esci dalla navigazione" title="esci dalla navigazione" href="#">
+        <span class="Hamburger-toggle is-active" aria-hidden="true"></span>
+      </a>
+    </div>
+    <nav>
+			<ul class="Linklist Linklist--padded Treeview Treeview--default js-fr-treeview u-text-r-xs">
+  <li><a href="#">Ut provident qui</a>
+    <ul>
+      <li><a href="#">Perspiciatis quisquam vel</a></li>
+      <li><a href="#">Hic consequuntur tenetur</a></li>
+      <li><a href="#">Ea magnam illo</a>
+        <ul>
+          <li><a href="#">Sed perspiciatis fuga</a></li>
+          <li><a href="#">Sit et debitis</a>
+            <ul>
+              <li><a href="#">Sit et debitis</a></li>
+              <li><a href="#">Alias dolor soluta</a></li>
+              <li><a href="#">Nemo sit eaque</a></li>
+            </ul>
+          </li>
+          <li><a href="#">Magnam rerum culpa</a></li>
+        </ul>
+      </li>
+      <li><a href="#">Fugiat est rerum</a></li>
+      <li><a href="#">Ut provident qui</a></li>
+    </ul>
+  </li>
+  <li data-megamenu-class="Megamenu-area">
+    <a data-megamenu-class="Button u-border-none u-color-95 u-background-compl u-text-r-xxs" href="#">Accedi</a>
+  </li>
+</ul>
+
+    </nav>
+  </div>
+</section>
+-->
+
+<div id="main">
+  {{template "main" .}}
+</div>
+
+<!--
+    <script src="/static/ita/js/jquery.min.js"></script>
+    <script src="/static/ita/js/bootstrap.min.js"></script>
+    -->
+
+    <script src="/static/ita/IWT.min.js"></script>
+    <script src="/static/bootstrap/js/bootstrap.min.js"></script>
+  </body>
+</html>
+{{ end }}

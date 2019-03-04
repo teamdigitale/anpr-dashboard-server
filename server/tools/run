@@ -1,0 +1,4 @@
+#!/bin/bash
+
+./server --http-listen-on='[::]:80' --https-listen-on='[::]:443' --config-file=./tools/config.yaml
+#./server --http-listen-on='[::]:80' --config-file=./tools/config.yaml
