@@ -159,12 +159,12 @@ func main() {
 
 	authorizationManager := NewAuthorizationManager(config.Groups)
 
-	htmlRender, err := templates.NewStaticTemplatesFromDir(*gWtemplates, nil)
+	htmlRender, err := templates.NewStaticTemplatesFromDir(nil, *g_wtemplates, nil)
 	if err != nil {
 		log.Fatal("Could not initialize web templates - ", err)
 	}
 
-	emailRender, err := templates.NewStaticTemplatesFromDir(*gEtemplates, nil)
+	emailRender, err := templates.NewStaticTemplatesFromDir(nil, *g_etemplates, nil)
 	if err != nil {
 		log.Fatal("Could not initialize email templates - ", err)
 	}
