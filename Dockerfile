@@ -36,47 +36,47 @@ RUN go get github.com/teamdigitale/anpr-dashboard-server/converter
 
 # Build the executables.
 RUN go build \
-    -o server/dashboard-server ./server
+    -o server/dashboard ./server
 
 RUN go build \
-    -o converter/dashboard-converter ./converter
+    -o converter/converter ./converter
 
 # Final stage: the running container.
 FROM alpine AS final
 
 # install certificates
-RUN apk add --no-cache ca-certificates
+RUN apk add --no-cache ca-certificates nginx
 
-# create destination folders
-RUN mkdir -p /opt/dashboard
-RUN mkdir -p /srv/anpr-dashboard
+# create destination folders and external mount points
+RUN mkdir -p /srv/anpr/db
+RUN mkdir -p /srv/anpr/vault
+RUN mkdir -p /srv/anpr/cache
 
 # Import the compiled executables from the second stage.
-COPY --from=builder /src/server/ /srv/anpr-dashboard/server/
-COPY --from=builder /src/converter/ /srv/anpr-dashboard/converter/
-COPY --from=builder /src/site/ /srv/anpr-dashboard/site/
+COPY --from=builder /src/site/ /srv/anpr/site/
+COPY --from=builder /src/server/ /srv/anpr/server/
+COPY --from=builder /src/converter/ /srv/anpr/converter/
 
 #Fix ownership to run the binary as non root
-RUN chown -R nobody:nobody /srv/anpr-dashboard
+RUN chown -R nobody:nobody /srv/anpr
 
 #Change the work directory where server build is
-WORKDIR /srv/anpr-dashboard/server/
+WORKDIR /srv/anpr/db/
 
 # Declare the port on which the webserver will be exposed.
 # As we're going to run the executable as an unprivileged user, we can't bind
 # to ports below 1024.
-EXPOSE 8443
+EXPOSE 8080
 
 # Perform any further action as an unprivileged user.
-# USER nobody:nobody
+USER nobody:nobody
 
 # Run the compiled binary.
-ENTRYPOINT ["./dashboard-server", "--https-listen-on=[::]:8443",\
-		   "--config-file=/opt/dashboard/config.yaml",\
-		   "--cookie-creds=/opt/dashboard/creds/cookie-creds.json",\
-		   "--email-creds=/opt/dashboard/creds/email-creds.yaml",\
-		   "--oauth-creds=/opt/dashboard/creds/oauth-creds.yaml",\
-		   "--web-templates=/srv/anpr-dashboard/server/templates/",\
-		   "--email-templates=/srv/anpr-dashboard/server/emails/",\
-		   "--static-content=/srv/anpr-dashboard/server/static/"]
-
+ENTRYPOINT ["/srv/anpr/server/dashboard", "--http-listen-on=127.0.0.1:8080",\
+		   "--config-file=/srv/anpr/vault/config",\
+		   "--cookie-creds=/srv/anpr/vault/cookie-creds",\
+		   "--email-creds=/srv/anpr/vault/email-creds",\
+		   "--oauth-creds=/srv/anpr/vault/oauth-creds",\
+		   "--web-templates=/srv/anpr/server/templates/",\
+		   "--email-templates=/srv/anpr/server/emails/",\
+		   "--static-content=/srv/anpr/server/static/"]
