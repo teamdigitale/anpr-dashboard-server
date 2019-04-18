@@ -7,7 +7,7 @@ FROM golang:${GO_VERSION}-alpine AS builder
 
 # Install the Certificate-Authority certificates for the app to be able to make
 # calls to HTTPS endpoints.
-RUN apk add --no-cache ca-certificates git openssh gcc libc-dev sqlite
+RUN apk add --no-cache ca-certificates git openssh gcc libc-dev 
 
 # Set the environment variables for the go command:
 # * CGO_ENABLED=0 to build a statically-linked executable
@@ -45,7 +45,7 @@ RUN go build \
 FROM alpine AS final
 
 # install certificates
-RUN apk add --no-cache ca-certificates nginx
+RUN apk add --no-cache ca-certificates nginx sqlite
 
 # create destination folders and external mount points
 RUN mkdir -p /srv/anpr/db
