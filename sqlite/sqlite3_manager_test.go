@@ -22,7 +22,7 @@ var fornitori = []Fornitore{
 }
 
 var comuni = []Comune{
-	{1, "00145", "Comune 1", "Marche", "AP", 1111122, null.IntFrom(10), 45.3595112, 11.7890789, fornitori[0], Responsible{"Donald", "Duck", "+39111111", "+39348111", "donald.duck@test.it"}, Indirizzo{"val gardena", "6453", "11", "comune1@pec.it"}, Subentro{},
+	{1, "00145", "Comune 1", "Marche", "AP", 1111122, 11111, null.IntFrom(10), 45.3595112, 11.7890789, fornitori[0], Responsible{"Donald", "Duck", "+39111111", "+39348111", "donald.duck@test.it"}, Indirizzo{"val gardena", "6453", "11", "comune1@pec.it"}, Subentro{},
 		//Data Subentro:11/01/2019
 		null.NewTime(time.Unix(1547164800, 0), true),
 		null.NewTime(time.Unix(1547164800, 0), true),
@@ -37,7 +37,7 @@ var comuni = []Comune{
 		null.NewTime(time.Unix(1547164800, 0), true),
 		null.NewTime(time.Unix(1547164800, 0), true),
 	},
-	{2, "00146", "Comune 2", "Marche", "AP", 1111122, null.IntFrom(5), 46.3595112, 12.7890789, fornitori[1], Responsible{"Donald", "Duck", "+39111111", "+39348111", "donald.duck@test.it"}, Indirizzo{"val di fassa", "6455", "12", "comune2@pec.it"}, Subentro{},
+	{2, "00146", "Comune 2", "Marche", "AP", 1111122, 1111, null.IntFrom(5), 46.3595112, 12.7890789, fornitori[1], Responsible{"Donald", "Duck", "+39111111", "+39348111", "donald.duck@test.it"}, Indirizzo{"val di fassa", "6455", "12", "comune2@pec.it"}, Subentro{},
 
 		null.NewTime(time.Unix(1547164800, 0), true),
 		null.NewTime(time.Unix(1547164800, 0), true),
@@ -241,7 +241,31 @@ func TestSaveComment(t *testing.T) {
 
 	removeDB()
 }
+func TestUpdateComuneFornitore(t *testing.T) {
 
+	var db = createTestDB()
+
+	InsertFornitori(db, fornitori)
+	InsertComuni(db, comuni)
+
+	codiceIstat := comuni[0].CodiceIstat
+	assert.Equal(t, comuni[0].Fornitore.Id, fornitori[0].Id)
+	log.Print(codiceIstat)
+
+	UpdateComuneFornitore(db, codiceIstat, fornitori[1].Id)
+
+	searchFilter := SearchFilter{
+		Comune: Comune{
+			CodiceIstat: codiceIstat,
+		},
+	}
+	var comuni_updated []Comune = SearchComuni(db, searchFilter)
+	assert.Equal(t, comuni_updated[0].Fornitore.Id, fornitori[1].Id)
+
+	db.Close()
+
+	removeDB()
+}
 func TestUpdateSubentroDateForComune(t *testing.T) {
 	var db = createTestDB()
 

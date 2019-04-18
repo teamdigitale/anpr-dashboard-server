@@ -237,8 +237,31 @@ func (manager *StorageManager) SearchComuniByCodiceIstat(ctx *gin.Context, codic
 	res.Result = "ok"
 	ctx.JSON(200, res)
 }
-func (manager *StorageManager) Search(ctx *gin.Context) {
 
+func (manager *StorageManager) UpdateFornitore(ctx *gin.Context) {
+	credentials := GetCredentials(ctx)
+	res := StorageResult{
+		Result: "nok",
+	}
+
+	if !manager.authz_mgr.IsAdmin(credentials) {
+		ctx.JSON(403, res)
+		return
+	}
+	comuneFornitore := sqlite.ComuneFornitore{}
+	err := ctx.BindJSON(&comuneFornitore)
+	if err != nil {
+		res.Error = err.Error()
+		ctx.JSON(400, res)
+		return
+	}
+	sqlite.UpdateComuneFornitore(manager.db, comuneFornitore.CodiceIstat, comuneFornitore.FornitoreID)
+	res.Result = "ok"
+	ctx.JSON(200, res)
+
+}
+func (manager *StorageManager) Search(ctx *gin.Context) {
+	credentials := GetCredentials(ctx)
 	res := StorageResult{
 		Result: "nok",
 	}
@@ -253,8 +276,6 @@ func (manager *StorageManager) Search(ctx *gin.Context) {
 	}
 
 	comuni := sqlite.SearchComuni(manager.db, filter)
-
-	credentials := GetCredentials(ctx)
 
 	for _, comune := range comuni {
 		acl := manager.getACLComune(comune)

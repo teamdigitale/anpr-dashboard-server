@@ -256,6 +256,8 @@ func main() {
 		codiceIstat := c.Param("codice_istat")
 		storageManager.SearchComuniByCodiceIstat(c, codiceIstat)
 	})
+
+	router.POST("/api/comune/updateFornitore", urlmanager.OnlyLoggedHandler(storageManager.UpdateFornitore))
 	router.GET("/api/getSubentroInfo/*date", urlmanager.OnlyLoggedHandler(storageManager.GetSubentroInfo))
 	// Install a not found handler. The not found handler uses an internal
 	// router created and updated dynamically from the list of documents to

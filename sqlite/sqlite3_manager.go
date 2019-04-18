@@ -102,6 +102,10 @@ const (
 	ExcludeAlreadyWithSubentro
 )
 
+type ComuneFornitore struct {
+	CodiceIstat string `json:"CodiceIstat"`
+	FornitoreID int    `json:"FornitoreId"`
+}
 type AnomalieSearchFilter struct {
 	CodiceIstat string     `json:"CodiceIstat"`
 	Order       *Order     `json:"order"`
@@ -780,6 +784,7 @@ func InsertComuni(db *sql.DB, comuni []Comune) {
 			PROVINCIA,
 			REGION,
 			POPOLAZIONE,
+			POPOLAZIONE_AIRE,
 			CODICE_ISTAT,
 			POSTAZIONI,
 			LAT,
@@ -806,7 +811,7 @@ func InsertComuni(db *sql.DB, comuni []Comune) {
 			DATA_RITIRO_SC
 
 			)
-				values(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`
+				values(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`
 
 	stmt, err := tx.Prepare(sqlInsert)
 	if err != nil {
@@ -814,7 +819,7 @@ func InsertComuni(db *sql.DB, comuni []Comune) {
 	}
 	for i := 0; i < len(comuni); i++ {
 		var comune = comuni[i]
-		_, err = stmt.Exec(comune.Fornitore.Id, comune.Name, comune.Province, comune.Region, comune.Population, comune.CodiceIstat, comune.Postazioni, comune.Lat, comune.Lon, comune.Responsible.Name, comune.Responsible.Surname, comune.Responsible.Phone, comune.Responsible.Mobile, comune.Responsible.Email, comune.Indirizzo.Via, comune.Indirizzo.Cap, comune.Indirizzo.Civico, comune.Indirizzo.Pec, comune.DataSubentro.Time.Unix(), comune.DataAbilitazione.Time.Unix(), comune.DataPresubentro.Time.Unix(), comune.AbilitazionePrefettura, comune.UtentiAbilitati, comune.DataConsegnaSm.Time.Unix(), comune.NumeroLettori, comune.IPProvenienza, comune.EmailPec, comune.SCConsegnate, comune.DataRitiroSm.Time.Unix())
+		_, err = stmt.Exec(comune.Fornitore.Id, comune.Name, comune.Province, comune.Region, comune.Population, comune.PopulationAIRE, comune.CodiceIstat, comune.Postazioni, comune.Lat, comune.Lon, comune.Responsible.Name, comune.Responsible.Surname, comune.Responsible.Phone, comune.Responsible.Mobile, comune.Responsible.Email, comune.Indirizzo.Via, comune.Indirizzo.Cap, comune.Indirizzo.Civico, comune.Indirizzo.Pec, comune.DataSubentro.Time.Unix(), comune.DataAbilitazione.Time.Unix(), comune.DataPresubentro.Time.Unix(), comune.AbilitazionePrefettura, comune.UtentiAbilitati, comune.DataConsegnaSm.Time.Unix(), comune.NumeroLettori, comune.IPProvenienza, comune.EmailPec, comune.SCConsegnate, comune.DataRitiroSm.Time.Unix())
 		if err != nil {
 			log.Print(err)
 		}
@@ -1052,6 +1057,29 @@ func UpdateAlertsTable(db *sql.DB, alert string) {
 		panic(err)
 	}
 	_, err = stmt.Exec(time.Time.Unix(time.Now()), alert)
+
+	if err != nil {
+		log.Print(err)
+	}
+	defer stmt.Close()
+	tx.Commit()
+}
+
+/**
+Update the association between a comune and a fornitore
+*/
+func UpdateComuneFornitore(db *sql.DB, codiceIstat string, fornitore int) {
+	tx, err := db.Begin()
+	if err != nil {
+		panic(err)
+	}
+	sqlString := "UPDATE COMUNE SET ID_FORNITORE = ? WHERE CODICE_ISTAT = ?"
+
+	stmt, err := tx.Prepare(sqlString)
+	if err != nil {
+		panic(err)
+	}
+	_, err = stmt.Exec(fornitore, codiceIstat)
 
 	if err != nil {
 		log.Print(err)
