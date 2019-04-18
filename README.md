@@ -8,40 +8,6 @@ Specifically:
 2) **site** - the site itself.
 
 
-**Come aggiornare il file di configurazione della dashboard**
-
-E' necessario scaricare il repository di produzione che é
-
-https://github.com/teamdigitale/production
-
-Prima di dare qualsiasi comando con ANSIBLE
-**é necessario aggiornare il repository locale**
-
-Il file di configurazione é
-```
-ansible/roles/teamdigitale_dashboard_anpr/templates/config.yaml.j2
-```
-Il comando ansible va lanciato dalla stessa directory "ansible".
-
-Il comando da lanciare é il seguente e la password é recuperabile dal documento (https://docs.google.com/document/d/1rqy4uVXm0OeYuJXjjbUNnXNsOz483he7CDYfA7M6g6s/edit) ad accesso limitato
-
-```
-ansible-playbook site.yml --limit dashboard_anpr --diff --ask-vault-pass --tags "anpr"
-```
-
-Dry-run:
-```
-ansible-playbook site.yml --limit dashboard_anpr --diff --ask-vault-pass --check --tags "anpr"
-```
-
-Nel lanciare la dashboard collegati come root sul server in modalità ssh
-```
-ssh root@dashboard.anpr.it
-```
-Per rilanciare e dashboard (dashboard.anpr.it)
-
- ```stop dashboard && start dashboard```
-
 
  ## Alcune query da eseguire sul server
 Cerca fornitore per un COMUNE
@@ -130,14 +96,8 @@ go ins```
 
 *se volete mantenere il codice sorgente in un vostro workspace fuori dal $GOPATH...*
 
-1. **cloning del repo**
- ```
- cd <PATH VOSTRO WORKSPACE>
- ssh-agent bash -c 'ssh-add ~/.ssh/id_rsa; git clone git@github.com:teamdigitale/anpr-dashboard-server.git'
- ```
-*aggiustate il path della vostra chiave ssh...*
 
- 2. **setup configurazioni varie e build del progetto**
+ 1. **setup configurazioni varie e build del progetto**
  ```
  cd anpr-dashboard-server/server
  mkdir creds
@@ -147,12 +107,12 @@ go ins```
  make build
  ```
 
- 3. **run del server**
+ 2. **run del server**
  ```
  ./server --mode=debug --config-file=/<PATH VOSTRO WORKSPACE>/anpr-dashboard-server/dashboard-subentro/subentroconfig.yaml
  ```
 
- 4. **in caso ci fossero problemi con le dipendenze...**
+ 3. **in caso ci fossero problemi con le dipendenze...**
  ```
 git config --global --add url."git@github.com:".insteadOf "https://github.com/"
 get ./...
