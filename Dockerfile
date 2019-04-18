@@ -7,7 +7,7 @@ FROM golang:${GO_VERSION}-alpine AS builder
 
 # Install the Certificate-Authority certificates for the app to be able to make
 # calls to HTTPS endpoints.
-RUN apk add --no-cache ca-certificates git openssh gcc libc-dev
+RUN apk add --no-cache ca-certificates git openssh gcc libc-dev sqlite
 
 # Set the environment variables for the go command:
 # * CGO_ENABLED=0 to build a statically-linked executable
