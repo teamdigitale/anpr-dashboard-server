@@ -45,7 +45,7 @@ RUN go build \
 FROM alpine AS final
 
 # install certificates
-RUN apk add --no-cache ca-certificates nginx sqlite
+RUN apk add --no-cache ca-certificates sqlite
 
 # create destination folders and external mount points
 RUN mkdir -p /srv/anpr/db
