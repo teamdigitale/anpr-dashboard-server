@@ -8,7 +8,6 @@ Specifically:
 2) **site** - the site itself.
 
 
-
  ## Alcune query da eseguire sul server
 Cerca fornitore per un COMUNE
 
