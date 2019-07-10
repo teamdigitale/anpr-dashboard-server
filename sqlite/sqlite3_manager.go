@@ -19,7 +19,7 @@ const (
 	PROACTIVE       = "ProactiveEmailAlert"
 	REACTIVE        = "ReactiveEmailAlert"
 	kDatabaseSchema = `
-BEGIN TRANSACTION;
+
 
 CREATE TABLE IF NOT EXISTS SUBENTRO (
  ID_COMUNE INTEGER NOT NULL,
@@ -69,6 +69,9 @@ CREATE TABLE IF NOT EXISTS COMUNE (
  SC_CONSEGNATE INT,
  DATA_RITIRO_SC INT,
  DATA_PRIMO_PRESUBENTRO INT,
+ DATA_CESSAZIONE INT,
+ TIPO_CESSAZIONE TEXT,
+ COMUNE_CONFLUENZA TEXT,
 
  FOREIGN KEY(ID_FORNITORE) REFERENCES FORNITORE(ID)
 );
@@ -81,7 +84,7 @@ CREATE TABLE IF NOT EXISTS COMMENTO (
  CONTENT TEXT NOT NULL,
  FOREIGN KEY(ID_COMUNE) REFERENCES ID_COMUNE(ID)
 );
-COMMIT;
+
 `
 	k_dateFormat = "02/01/2006"
 )
@@ -183,6 +186,10 @@ type Comune struct {
 	SCConsegnate           null.Int
 	DataRitiroSm           null.Time
 	DataPrimoPresubentro   null.Time
+
+	DataCessazione   null.Time
+	TipoCessazione   null.String
+	ComuneConfluenza null.String
 }
 
 //Holds just the basic information about a Comue
@@ -491,7 +498,7 @@ func SearchAlerts(db *sql.DB, alertType string) []Alerting {
 			INNER JOIN FORNITORE on FORNITORE.ID = COMUNE.ID_FORNITORE
 			INNER JOIN SUBENTRO on SUBENTRO.ID_COMUNE = COMUNE.ID
 			INNER JOIN REFERENTI on REFERENTI.ID = FORNITORE.ID
-		WHERE ` + whereClause + ` 
+		WHERE COMUNE.DATA_CESSAZIONE IS NULL AND ` + whereClause + ` 
 		ORDER BY COMUNE.NAME;
 		`)
 
@@ -614,7 +621,7 @@ func SearchComuni(db *sql.DB, searchFilter SearchFilter) []Comune {
 
 		 FROM COMUNE co
 	 		INNER JOIN  FORNITORE fn ON fn.ID = co.ID_FORNITORE
-			LEFT OUTER JOIN SUBENTRO su ON co.ID = su.ID_COMUNE WHERE  1
+			LEFT OUTER JOIN SUBENTRO su ON co.ID = su.ID_COMUNE WHERE  co.DATA_CESSAZIONE IS NULL
 		 `)
 	var args []interface{}
 
@@ -808,10 +815,13 @@ func InsertComuni(db *sql.DB, comuni []Comune) {
 			IPPROVENIENZA,
 			EMAILPEC,
 			SC_CONSEGNATE,
-			DATA_RITIRO_SC
+			DATA_RITIRO_SC,
+			DATA_CESSAZIONE,
+			TIPO_CESSAZIONE,
+			COMUNE_CONFLUENZA
 
 			)
-				values(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`
+				values(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`
 
 	stmt, err := tx.Prepare(sqlInsert)
 	if err != nil {
@@ -819,7 +829,7 @@ func InsertComuni(db *sql.DB, comuni []Comune) {
 	}
 	for i := 0; i < len(comuni); i++ {
 		var comune = comuni[i]
-		_, err = stmt.Exec(comune.Fornitore.Id, comune.Name, comune.Province, comune.Region, comune.Population, comune.PopulationAIRE, comune.CodiceIstat, comune.Postazioni, comune.Lat, comune.Lon, comune.Responsible.Name, comune.Responsible.Surname, comune.Responsible.Phone, comune.Responsible.Mobile, comune.Responsible.Email, comune.Indirizzo.Via, comune.Indirizzo.Cap, comune.Indirizzo.Civico, comune.Indirizzo.Pec, comune.DataSubentro.Time.Unix(), comune.DataAbilitazione.Time.Unix(), comune.DataPresubentro.Time.Unix(), comune.AbilitazionePrefettura, comune.UtentiAbilitati, comune.DataConsegnaSm.Time.Unix(), comune.NumeroLettori, comune.IPProvenienza, comune.EmailPec, comune.SCConsegnate, comune.DataRitiroSm.Time.Unix())
+		_, err = stmt.Exec(comune.Fornitore.Id, comune.Name, comune.Province, comune.Region, comune.Population, comune.PopulationAIRE, comune.CodiceIstat, comune.Postazioni, comune.Lat, comune.Lon, comune.Responsible.Name, comune.Responsible.Surname, comune.Responsible.Phone, comune.Responsible.Mobile, comune.Responsible.Email, comune.Indirizzo.Via, comune.Indirizzo.Cap, comune.Indirizzo.Civico, comune.Indirizzo.Pec, comune.DataSubentro.Time.Unix(), comune.DataAbilitazione.Time.Unix(), comune.DataPresubentro.Time.Unix(), comune.AbilitazionePrefettura, comune.UtentiAbilitati, comune.DataConsegnaSm.Time.Unix(), comune.NumeroLettori, comune.IPProvenienza, comune.EmailPec, comune.SCConsegnate, comune.DataRitiroSm.Time.Unix(), comune.DataCessazione, comune.TipoCessazione, comune.ComuneConfluenza)
 		if err != nil {
 			log.Print(err)
 		}
@@ -932,7 +942,7 @@ func UpdateComuneCheckListDate(db *sql.DB, comuni []Comune) {
 		panic(err)
 	}
 
-	stmt, err := tx.Prepare("UPDATE COMUNE SET DATA_SUBENTRO=?,DATA_ABILITAZIONE_TEST=?,DATA_PRESUBENTRO=?,ABILITAZIONE_PREFETTURA=?, UTENTI_ABILITATI=?,DATA_CONSEGNA_SC=?,NUMERO_LETTORI =?,IPPROVENIENZA =?, EMAILPEC=?, SC_CONSEGNATE=?,POSTAZIONI=?, DATA_RITIRO_SC=?, DATA_PRIMO_PRESUBENTRO=?, POPOLAZIONE=?, POPOLAZIONE_AIRE=? WHERE CODICE_ISTAT=?;")
+	stmt, err := tx.Prepare("UPDATE COMUNE SET DATA_SUBENTRO=?,DATA_ABILITAZIONE_TEST=?,DATA_PRESUBENTRO=?,ABILITAZIONE_PREFETTURA=?, UTENTI_ABILITATI=?,DATA_CONSEGNA_SC=?,NUMERO_LETTORI =?,IPPROVENIENZA =?, EMAILPEC=?, SC_CONSEGNATE=?,POSTAZIONI=?, DATA_RITIRO_SC=?, DATA_PRIMO_PRESUBENTRO=?, POPOLAZIONE=?, POPOLAZIONE_AIRE=?,DATA_CESSAZIONE=?,TIPO_CESSAZIONE=?,COMUNE_CONFLUENZA=? WHERE CODICE_ISTAT=?;")
 	if err != nil {
 		panic(err)
 	}
@@ -956,6 +966,10 @@ func UpdateComuneCheckListDate(db *sql.DB, comuni []Comune) {
 			TimeStampOrNull(comune.DataPrimoPresubentro),
 			comune.Population,
 			comune.PopulationAIRE,
+			//Date di cessazione
+			comune.DataCessazione,
+			comune.TipoCessazione,
+			comune.ComuneConfluenza,
 			comune.CodiceIstat,
 		)
 		if err != nil {

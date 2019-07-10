@@ -36,6 +36,9 @@ var comuni = []Comune{
 		null.IntFrom(10),
 		null.NewTime(time.Unix(1547164800, 0), true),
 		null.NewTime(time.Unix(1547164800, 0), true),
+		null.TimeFromPtr(nil),
+		null.StringFromPtr(nil),
+		null.StringFromPtr(nil),
 	},
 	{2, "00146", "Comune 2", "Marche", "AP", 1111122, 1111, null.IntFrom(5), 46.3595112, 12.7890789, fornitori[1], Responsible{"Donald", "Duck", "+39111111", "+39348111", "donald.duck@test.it"}, Indirizzo{"val di fassa", "6455", "12", "comune2@pec.it"}, Subentro{},
 
@@ -51,6 +54,9 @@ var comuni = []Comune{
 		null.IntFrom(15),
 		null.NewTime(time.Unix(1547164800, 0), true),
 		null.NewTime(time.Unix(1547164800, 0), true),
+		null.TimeFromPtr(nil),
+		null.StringFromPtr(nil),
+		null.StringFromPtr(nil),
 	},
 }
 
@@ -63,8 +69,13 @@ func checkError(e error) {
 }
 func createTestDB() *sql.DB {
 	var db = OpenDB(testDB)
+	tx, err := db.Begin()
+	if err != nil {
+		panic(err)
+	}
+	tx.Exec(kDatabaseSchema)
 
-	db.Exec(kDatabaseSchema)
+	tx.Commit()
 	return db
 }
 func removeDB() {
@@ -73,7 +84,6 @@ func removeDB() {
 func TestInsertComuni(t *testing.T) {
 	var db = createTestDB()
 
-	InsertFornitori(db, fornitori)
 	InsertComuni(db, comuni)
 	assert.Equal(t, len(comuni), getTableCount(db, "COMUNE"))
 	db.Close()

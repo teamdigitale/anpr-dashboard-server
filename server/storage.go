@@ -628,6 +628,9 @@ type ComuneState struct {
 	SCConsegnate            string `xml:"NUMEROSMARTCARDCONSEGNATE"`
 	DataRitiroSmartCard     string `xml:"DATARITIROSCPREFETTURA"`
 	DataPrimoPreSubentro    string `xml:"DATAPRIMOPRESUBENTRO"`
+	DataCessazione          string `xml:"DATACESSAZIONE"`
+	TipoCessazione          string `xml:"TIPOCESSAZIONE"`
+	ComuneDiConfluenza      string `xml:"COMUNEDICONFLUENZA"`
 }
 
 type AnomaliaState struct {
@@ -707,6 +710,10 @@ func (state *ComuneState) ToComune() sqlite.Comune {
 		population, _ = strconv.Atoi(state.PopolazioneIstat)
 	}
 	comune.Population = population
+	comune.DataCessazione = NullTimeFromString(state.DataCessazione)
+	comune.TipoCessazione = null.StringFrom(state.TipoCessazione)
+	comune.ComuneConfluenza = null.StringFrom(state.ComuneDiConfluenza)
+	//aggiungi comune di cessazione
 	return comune
 }
 
