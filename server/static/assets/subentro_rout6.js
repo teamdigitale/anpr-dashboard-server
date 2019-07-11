@@ -150,9 +150,7 @@ var  subentro = {
         $(".checkListComuneDati").html("<td colspan=\"10\">Comune subentrato il "+subentro.dateFormat(new Date(subentro.comune.DataSubentro))+"</td>");
       }else{
         
-      var v =  "<td>";
-      var abilitazionePrefettura = subentro.comune.AbilitazionePrefettura? "SI":"NO";
-      v+=abilitazionePrefettura+"</td>";
+      var v =  "<td>"+subentro.comune.CodiceIstat+"</td>";
 
 
       v+="</td>";
