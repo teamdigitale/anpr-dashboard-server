@@ -143,13 +143,14 @@ func addDateToFeatureIfNotEmpty(fc *geojson.Feature, propertyName string, aNullT
 //Convert ad object of time sqlite.Comune to
 //<a href="https://tools.ietf.org/html/rfc7946">geoison.Feature</a>
 func toFeature(comune sqlite.Comune) *geojson.Feature {
-
+	//get the provincie map singleton
+	provincie := *GetProvincieMapInstance()
 	feature := geojson.NewPointFeature([]float64{comune.Lon, comune.Lat})
 	feature.SetProperty("label", comune.Name)
-	feature.SetProperty("PROVINCIA", comune.Province)
+	feature.SetProperty("PROVINCIA", provincie.Map[comune.Province].ProvinciaExt)
 	feature.SetProperty("REGIONE", comune.Region)
 	//TODO: Add zone mapping
-	feature.SetProperty("ZONA", "Nord-Est")
+	feature.SetProperty("ZONA", provincie.Map[comune.Province].Zona)
 	feature.SetProperty("popolazione", comune.Population)
 	feature.SetProperty("popolazione_aire", comune.PopulationAIRE)
 
