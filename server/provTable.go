@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/csv"
 	"os"
+	"sync"
 )
 
 type ProvincieMap struct {
@@ -14,9 +15,12 @@ type Provincia struct {
 }
 
 var instance *ProvincieMap
+var mu sync.Mutex
 
 func GetProvincieMapInstance() *ProvincieMap {
 	if instance == nil {
+		mu.Lock()
+		defer mu.Unlock()
 		instance = &ProvincieMap{}
 		instance.Map = make(map[string]Provincia)
 		f, err := os.Open("./vc/prov.tsv")
@@ -33,7 +37,7 @@ func GetProvincieMapInstance() *ProvincieMap {
 		}
 
 		defer f.Close()
-		// <--- NOT THREAD SAFE
+
 	}
 	return instance
 }
