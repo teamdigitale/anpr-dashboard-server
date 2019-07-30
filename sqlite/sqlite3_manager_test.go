@@ -60,6 +60,27 @@ var comuni = []Comune{
 	},
 }
 
+var comuniInattivi = []Comune{
+	{1, "00145", "Comune 3", "Marche", "AP", 1111122, 11111, null.IntFrom(10), 45.3595112, 11.7890789, fornitori[0], Responsible{"Donald", "Duck", "+39111111", "+39348111", "donald.duck@test.it"}, Indirizzo{"val gardena", "6453", "11", "comune1@pec.it"}, Subentro{},
+		//Data Subentro:11/01/2019
+		null.TimeFromPtr(nil),
+		null.TimeFromPtr(nil),
+		null.TimeFromPtr(nil),
+		null.BoolFrom(true),
+		null.IntFrom(1),
+		null.TimeFromPtr(nil),
+		null.IntFrom(1),
+		null.BoolFrom(true),
+		null.BoolFrom(true),
+		null.IntFrom(10),
+		null.TimeFromPtr(nil),
+		null.TimeFromPtr(nil),
+		null.TimeFromPtr(nil),
+		null.StringFromPtr(nil),
+		null.StringFromPtr(nil),
+	},
+}
+
 func checkError(e error) {
 	if e != nil {
 		log.Fatal(e)
@@ -109,7 +130,7 @@ func TestSearchComuni(t *testing.T) {
 		},
 	}
 
-	var comuni []Comune = SearchComuni(db, searchFilter)
+	var comuni = SearchComuni(db, searchFilter)
 	assert.Equal(t, 1, len(comuni))
 	assert.Equal(t, "Comune 1", comuni[0].Name)
 	assert.Equal(t, "Fornitore 1", comuni[0].Fornitore.Name)
@@ -119,7 +140,7 @@ func TestSearchComuni(t *testing.T) {
 	assert.Equal(t, null.IntFrom(10), comuni[0].SCConsegnate)
 	//Search for id Comune
 
-	var comuniById []Comune = SearchComuni(db, SearchFilter{
+	var comuniById = SearchComuni(db, SearchFilter{
 		Comune: Comune{
 			Id: 1,
 		},
@@ -134,6 +155,19 @@ func TestSearchComuni(t *testing.T) {
 	db.Close()
 	removeDB()
 
+}
+func TestSearchComuniWithFilter(t *testing.T) {
+	var db = createTestDB()
+
+	InsertFornitori(db, fornitori)
+	InsertComuni(db, comuniInattivi)
+
+	var inactives = SearchComuni(db, SearchFilter{
+		Exclusion: &Exclusion{
+			4,
+		},
+	})
+	assert.Empty(t, inactives)
 }
 func TestSearchSubentro(t *testing.T) {
 
@@ -154,7 +188,9 @@ func TestSearchSubentro(t *testing.T) {
 
 	var comuni []Comune = SearchComuni(db, searchFilter)
 	fmt.Printf("found %d comni", len(comuni))
+	db.Close()
 
+	removeDB()
 }
 
 func TestSaveSubentro(t *testing.T) {
@@ -178,9 +214,9 @@ func TestSaveSubentro(t *testing.T) {
 			Id: 1,
 		},
 	}
-	var comuni_updated []Comune = SearchComuni(db, searchFilter)
-	log.Printf("URL %s", comuni_updated[0].Subentro.IP.String)
-	assert.NotEmpty(t, comuni_updated[0].Subentro.IP.String)
+	var comuniUpdated = SearchComuni(db, searchFilter)
+	//log.Printf("URL %s", comuniUpdated[0].Subentro.IP.String)
+	assert.NotEmpty(t, comuniUpdated[0].Subentro.IP.String)
 	db.Close()
 
 	removeDB()

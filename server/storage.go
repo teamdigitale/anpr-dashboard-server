@@ -347,6 +347,19 @@ func (manager *StorageManager) GetSubentroInfo(ctx *gin.Context) {
 	log.Printf("Info retrieved %v for date %v, param %s", info, date, dateString)
 	ctx.JSON(200, info)
 }
+
+func (manager *StorageManager) GetFullDashboardData(ctx *gin.Context) {
+
+	ctx.JSON(200, GetDashBoardData(sqlite.SearchComuni(manager.db, sqlite.SearchFilter{})))
+	/*,
+
+	sqlite.SearchFilter{
+
+	Exclusion: &sqlite.Exclusion{
+		4,
+	}}*/
+
+}
 func (manager *StorageManager) SaveOrUpdateComment(ctx *gin.Context) {
 	res := StorageResult{
 		Result: "nok",
