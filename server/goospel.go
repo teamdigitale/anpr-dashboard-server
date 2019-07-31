@@ -256,6 +256,10 @@ func main() {
 		codiceIstat := c.Param("codice_istat")
 		storageManager.SearchComuniByCodiceIstat(c, codiceIstat)
 	})
+	router.GET("/api/dashboard/data.json", func(c *gin.Context) {
+
+		storageManager.GetFullDashboardData(c)
+	})
 
 	router.POST("/api/comune/updateFornitore", urlmanager.OnlyLoggedHandler(storageManager.UpdateFornitore))
 	router.GET("/api/getSubentroInfo/*date", urlmanager.OnlyLoggedHandler(storageManager.GetSubentroInfo))

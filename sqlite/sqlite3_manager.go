@@ -14,6 +14,14 @@ import (
 	"gopkg.in/guregu/null.v3"
 )
 
+func IntValue(t null.Time) *int64 {
+	if !t.Valid {
+		return nil
+	}
+	v := t.Time.Unix()
+	return &v
+}
+
 // internal conts
 const (
 	PROACTIVE       = "ProactiveEmailAlert"
@@ -97,12 +105,15 @@ const (
 	DateFinal
 	Population
 	SubentroFrom
+	DatePresubentro
+	DataSubentro
 )
 
 const (
 	ExcludeWithoutFinalDate ExclusionType = iota
 	ExcludeWithoutSubentro
 	ExcludeAlreadyWithSubentro
+	ExcludeInactive
 )
 
 type ComuneFornitore struct {
@@ -137,7 +148,7 @@ type Fornitore struct {
 	Id    int `json:"id"`
 	Name  string
 	Url   string
-	eMail string
+	EMail string
 }
 type Order struct {
 	OrderType OrderType
@@ -457,7 +468,7 @@ func SaveOrUpdateSubentro(db *sql.DB, comune Comune) {
 		}
 	}
 
-	//log.Print(saveOrUpdateSQL)
+	log.Print(saveOrUpdateSQL)
 	tx, err := db.Begin()
 	if err != nil {
 		panic(err)
@@ -666,6 +677,10 @@ func SearchComuni(db *sql.DB, searchFilter SearchFilter) []Comune {
 		sqlbuffer.WriteString(" AND co.DATA_SUBENTRO IS NULL")
 
 	}
+	if searchFilter.Exclusion != nil && searchFilter.Exclusion.ExclusionType == 4 {
+		sqlbuffer.WriteString(" AND (co.DATA_SUBENTRO IS NOT NULL OR co.DATA_PRESUBENTRO IS NOT NULL )")
+
+	}
 
 	//Exclusion conditios
 	var exclusion = " "
@@ -687,11 +702,17 @@ func SearchComuni(db *sql.DB, searchFilter SearchFilter) []Comune {
 		if searchFilter.Order.OrderType == 4 {
 			orderString = "su.RANGE_FROM ASC"
 		}
+		if searchFilter.Order.OrderType == 5 {
+			orderString = "co.DATA_PRESUBENTRO DESC"
+		}
+		if searchFilter.Order.OrderType == 6 {
+			orderString = "co.DATA_SUBENTRO DESC"
+		}
 
 	}
 	sqlbuffer.WriteString(" ORDER BY ")
 	sqlbuffer.WriteString(orderString)
-	//log.Print(sqlbuffer.String())
+
 	rows, err := db.Query(sqlbuffer.String(), args...)
 
 	if err != nil {
@@ -829,7 +850,7 @@ func InsertComuni(db *sql.DB, comuni []Comune) {
 	}
 	for i := 0; i < len(comuni); i++ {
 		var comune = comuni[i]
-		_, err = stmt.Exec(comune.Fornitore.Id, comune.Name, comune.Province, comune.Region, comune.Population, comune.PopulationAIRE, comune.CodiceIstat, comune.Postazioni, comune.Lat, comune.Lon, comune.Responsible.Name, comune.Responsible.Surname, comune.Responsible.Phone, comune.Responsible.Mobile, comune.Responsible.Email, comune.Indirizzo.Via, comune.Indirizzo.Cap, comune.Indirizzo.Civico, comune.Indirizzo.Pec, comune.DataSubentro.Time.Unix(), comune.DataAbilitazione.Time.Unix(), comune.DataPresubentro.Time.Unix(), comune.AbilitazionePrefettura, comune.UtentiAbilitati, comune.DataConsegnaSm.Time.Unix(), comune.NumeroLettori, comune.IPProvenienza, comune.EmailPec, comune.SCConsegnate, comune.DataRitiroSm.Time.Unix(), comune.DataCessazione, comune.TipoCessazione, comune.ComuneConfluenza)
+		_, err = stmt.Exec(comune.Fornitore.Id, comune.Name, comune.Province, comune.Region, comune.Population, comune.PopulationAIRE, comune.CodiceIstat, comune.Postazioni, comune.Lat, comune.Lon, comune.Responsible.Name, comune.Responsible.Surname, comune.Responsible.Phone, comune.Responsible.Mobile, comune.Responsible.Email, comune.Indirizzo.Via, comune.Indirizzo.Cap, comune.Indirizzo.Civico, comune.Indirizzo.Pec, IntValue(comune.DataSubentro), comune.DataAbilitazione.Time.Unix(), IntValue(comune.DataPresubentro), comune.AbilitazionePrefettura, comune.UtentiAbilitati, comune.DataConsegnaSm.Time.Unix(), comune.NumeroLettori, comune.IPProvenienza, comune.EmailPec, comune.SCConsegnate, comune.DataRitiroSm.Time.Unix(), comune.DataCessazione, comune.TipoCessazione, comune.ComuneConfluenza)
 		if err != nil {
 			log.Print(err)
 		}
