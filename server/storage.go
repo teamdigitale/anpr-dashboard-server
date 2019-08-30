@@ -84,6 +84,7 @@ type StorageOptions struct {
 	Environment                string
 	CheckDataListPath          string
 	AnomalieSchedeSoggettoPath string
+	Vocabularies               string
 }
 
 func (options *StorageOptions) Merge(source *StorageOptions) *StorageOptions {
