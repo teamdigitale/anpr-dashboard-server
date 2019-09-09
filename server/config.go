@@ -115,6 +115,7 @@ var once sync.Once
 //Loads the configuration from file. This method needs to be call BEFORE #GetServerConfig which expect the configuration to be already initialized
 func InitServerConfigFromFile(filename string) *ServerConfig {
 
+	//ensure that this block of code is executed once
 	once.Do(func() {
 		log.Debug().Msgf("Load configuration from file :%s", filename)
 
@@ -131,7 +132,7 @@ func InitServerConfigFromFile(filename string) *ServerConfig {
 }
 func GetServerConfig() *ServerConfig {
 
-	log.Debug().Msgf("configuration file %v", serverConfigInst)
+	log.Debug().Msgf("Configuration file %v", serverConfigInst)
 
 	if serverConfigInst == nil {
 		panic("Config file not set. Please be sure tu initialize first using NewServerConfigFromFile  ")

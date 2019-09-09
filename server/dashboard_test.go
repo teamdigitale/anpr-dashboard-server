@@ -57,11 +57,12 @@ var comuni = []sqlite.Comune{
 }
 
 func TestDateFormatting(t *testing.T) {
+	InitServerConfigFromFile("./tools/config.sample.yaml")
 	var date = dateFormattedOrNull(comuni[0].DataSubentro)
 	assert.Equal(t, "11/01/2019", date)
 }
 func TestGetGetDashBoardData(t *testing.T) {
-
+	InitServerConfigFromFile("./tools/config.sample.yaml")
 	var dashboardData = GetDashBoardData(comuni)
 	assert.NotEmpty(t, dashboardData.Charts)
 	assert.NotEmpty(t, dashboardData.Fornitori)

@@ -83,7 +83,7 @@ var comuniInattivi = []Comune{
 
 func checkError(e error) {
 	if e != nil {
-		log.Fatal(e)
+		log.Fatal().Err(e)
 
 	}
 
@@ -228,20 +228,20 @@ func TestMarshaller(t *testing.T) {
 
 	jsonBytes, error := json.Marshal(aTime)
 	if error != nil {
-		log.Fatal("Marshal error,", error)
+		log.Fatal().Err(error)
 	}
 
 	var nullTime null.Time
 	error = json.Unmarshal([]byte("{\"Time\":\"2017-09-14T06:06:51.018Z\",\"Valid\":true}"), &nullTime)
 	if error != nil {
-		log.Fatal("Unmarshall error,", error)
+		log.Fatal().Err(error)
 	}
 	log.Print(nullTime)
 	assert.True(t, nullTime.Valid, "Time is not valid")
 
 	jsonBytes, error = json.Marshal(comuni[0])
 	if error != nil {
-		log.Fatal("Marshal error,", error)
+		log.Fatal().Err(error)
 	}
 	log.Printf("Marshal %s", string(jsonBytes))
 
@@ -250,7 +250,7 @@ func TestMarshaller(t *testing.T) {
 	var comune Comune
 	error = json.Unmarshal([]byte(aJsonString), &comune)
 	if error != nil {
-		log.Fatal("Marshal error,", error)
+		log.Fatal().Err(error)
 	}
 	log.Print(comune.Subentro.From)
 }
@@ -258,7 +258,7 @@ func TestMarshaller(t *testing.T) {
 func getTableCount(db *sql.DB, table string) int {
 	rows, err := db.Query("select count(*) from " + table)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal().Err(err)
 	}
 	defer rows.Close()
 	var nResult int = 0

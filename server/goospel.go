@@ -9,16 +9,16 @@ import (
 	"flag"
 	"html/template"
 	"io/ioutil"
-	"os"
-
 	"net"
 	"net/http"
+	"os"
 	"path"
 	"time"
 
 	"github.com/ccontavalli/goutils/email"
 	"github.com/ccontavalli/goutils/gin/gtemplates"
 	"github.com/ccontavalli/goutils/templates"
+	"github.com/gin-contrib/logger"
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-contrib/sessions/cookie"
 	"github.com/gin-gonic/gin"
@@ -214,7 +214,8 @@ func main() {
 			NoColor: false,
 		},
 	)
-	zerolog.TimeFieldFormat = zerolog.TimeFormatUnix
+	//zerolog.TimeFieldFormat = zerolog.TimeFormatUnix
+	router.Use(logger.SetLogger())
 
 	// Static URLS take precedence over any automatically computed URL.
 	// Note that static URLs cannot be updated at run time. Need restart.
@@ -240,7 +241,14 @@ func main() {
 	if *gMode == "debug" {
 
 		zerolog.SetGlobalLevel(zerolog.DebugLevel)
+		subLog := zerolog.New(os.Stdout).With().
+			Str("gin request", "").
+			Logger()
 
+		router.Use(logger.SetLogger(logger.Config{
+			Logger: &subLog,
+			UTC:    true,
+		}))
 		router.GET("/debug", urlmanager.Debug)
 		router.GET("/panic", func(c *gin.Context) { panic("silvestro vive") })
 	}

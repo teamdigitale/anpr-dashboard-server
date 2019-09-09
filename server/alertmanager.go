@@ -2,9 +2,10 @@ package main
 
 import (
 	"database/sql"
-	"log"
 	"strings"
 	"time"
+
+	"github.com/rs/zerolog/log"
 
 	"github.com/ccontavalli/goutils/email"
 	"github.com/teamdigitale/anpr-dashboard-server/sqlite"
@@ -51,14 +52,14 @@ func (manager *AlertManager) SendingEmailAlert(allAlerts []string) {
 
 		todayTS := time.Date(time.Now().Year(), time.Now().Month(), time.Now().Day(), 0, 0, 0, 0, time.Now().Location()).Unix()
 
-		log.Printf(t+" timesheet: on db %v, today %v", lastRun, todayTS)
+		log.Info().Msgf(t+" timesheet: on db %v, today %v", lastRun, todayTS)
 
 		if lastRun < todayTS {
 
 			alerting := sqlite.SearchAlerts(manager.db, t)
 
 			for _, v := range alerting {
-				log.Printf("MAIL ALERT | %v | %s | %s | %s | %s | %s", todayTS, t, v.Name, v.FornitoreName, v.DateTo, v.FornitoreEmail)
+				log.Info().Msgf("MAIL ALERT | %v | %s | %s | %s | %s | %s", todayTS, t, v.Name, v.FornitoreName, v.DateTo, v.FornitoreEmail)
 				revDateTo := strings.Split(v.DateTo, "-")
 				DateToHuman := revDateTo[2] + "-" + revDateTo[1] + "-" + revDateTo[0]
 
@@ -70,7 +71,7 @@ func (manager *AlertManager) SendingEmailAlert(allAlerts []string) {
 					struct{ NomeComune, DateTo, FornitoreName string }{v.Name, DateToHuman, v.FornitoreName},
 					v.FornitoreEmail)
 				if err != nil {
-					log.Printf("Could not send email for "+t+" notice: %s", err)
+					log.Warn().Msgf("Could not send email for "+t+" notice: %s", err)
 				}
 
 				if manager.config.StorageOptions.Environment == TESTENV {

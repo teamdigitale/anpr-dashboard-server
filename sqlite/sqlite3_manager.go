@@ -713,7 +713,7 @@ func SearchComuni(db *sql.DB, searchFilter SearchFilter) []Comune {
 	}
 	sqlbuffer.WriteString(" ORDER BY ")
 	sqlbuffer.WriteString(orderString)
-	log.Debug().Msgf("Query: %s", sqlbuffer)
+	log.Printf("Query: %v", sqlbuffer.String())
 	rows, err := db.Query(sqlbuffer.String(), args...)
 
 	if err != nil {
@@ -772,6 +772,7 @@ func SearchComuni(db *sql.DB, searchFilter SearchFilter) []Comune {
 	if err := rows.Err(); err != nil {
 		panic(err)
 	}
+
 	log.Info().Msgf("Query has returned %d comuni", len(comuni))
 
 	return comuni
