@@ -5,10 +5,11 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	"log"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/rs/zerolog/log"
 
 	_ "github.com/mattn/go-sqlite3"
 	"gopkg.in/guregu/null.v3"
@@ -448,7 +449,7 @@ func SaveOrUpdateSubentro(db *sql.DB, comune Comune) {
 	var saveOrUpdateSQL string
 
 	if !subentro.From.Valid || !subentro.To.Valid {
-		log.Printf("Passed an invalid Subentro date from:%v to:%v, ignore", subentro.From, subentro.To)
+		log.Info().Msgf("Passed an invalid Subentro date from:%v to:%v, ignore", subentro.From, subentro.To)
 		return
 
 	}
@@ -468,7 +469,7 @@ func SaveOrUpdateSubentro(db *sql.DB, comune Comune) {
 		}
 	}
 
-	log.Print(saveOrUpdateSQL)
+	//log.Print(saveOrUpdateSQL)
 	tx, err := db.Begin()
 	if err != nil {
 		panic(err)
@@ -712,7 +713,7 @@ func SearchComuni(db *sql.DB, searchFilter SearchFilter) []Comune {
 	}
 	sqlbuffer.WriteString(" ORDER BY ")
 	sqlbuffer.WriteString(orderString)
-
+	log.Printf("Query: %v", sqlbuffer.String())
 	rows, err := db.Query(sqlbuffer.String(), args...)
 
 	if err != nil {
@@ -771,7 +772,8 @@ func SearchComuni(db *sql.DB, searchFilter SearchFilter) []Comune {
 	if err := rows.Err(); err != nil {
 		panic(err)
 	}
-	fmt.Printf("Query has returned %d comuni", len(comuni))
+
+	log.Info().Msgf("Query has returned %d comuni", len(comuni))
 
 	return comuni
 }
@@ -792,7 +794,7 @@ func InsertFornitori(db *sql.DB, fornitori []Fornitore) {
 		_, err = stmt.Exec(fornitore.Name, fornitore.Url)
 
 		if err != nil {
-			log.Print(err)
+			log.Error().Err(err)
 		}
 	}
 
@@ -852,7 +854,7 @@ func InsertComuni(db *sql.DB, comuni []Comune) {
 		var comune = comuni[i]
 		_, err = stmt.Exec(comune.Fornitore.Id, comune.Name, comune.Province, comune.Region, comune.Population, comune.PopulationAIRE, comune.CodiceIstat, comune.Postazioni, comune.Lat, comune.Lon, comune.Responsible.Name, comune.Responsible.Surname, comune.Responsible.Phone, comune.Responsible.Mobile, comune.Responsible.Email, comune.Indirizzo.Via, comune.Indirizzo.Cap, comune.Indirizzo.Civico, comune.Indirizzo.Pec, IntValue(comune.DataSubentro), comune.DataAbilitazione.Time.Unix(), IntValue(comune.DataPresubentro), comune.AbilitazionePrefettura, comune.UtentiAbilitati, comune.DataConsegnaSm.Time.Unix(), comune.NumeroLettori, comune.IPProvenienza, comune.EmailPec, comune.SCConsegnate, comune.DataRitiroSm.Time.Unix(), comune.DataCessazione, comune.TipoCessazione, comune.ComuneConfluenza)
 		if err != nil {
-			log.Print(err)
+			log.Error().Err(err)
 		}
 	}
 
@@ -1002,7 +1004,7 @@ func UpdateComuneCheckListDate(db *sql.DB, comuni []Comune) {
 	defer stmt.Close()
 	err = tx.Commit()
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal().Err(err)
 	}
 	log.Printf("Updated %d comuni from DataCheckList.xml", len(comuni))
 }
@@ -1045,7 +1047,7 @@ func UpdateAnomalieSchedeSoggettoDate(db *sql.DB, anomalie []Anomalie) {
 	defer stmt.Close()
 	err = tx.Commit()
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal().Err(err)
 	}
 	log.Printf("Updated %d anomalie from AnomalieSchedeSoggettoPreSubV.2.xml", len(anomalie))
 }

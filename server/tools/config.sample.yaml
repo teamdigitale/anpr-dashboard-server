@@ -4,6 +4,7 @@ options:
     ../site/static:
       viewers: ["map_viewers"]
 storageoptions:
+  vocabularies: "./vc/"
   databasepath: "/tmp/subentro.db"
   fornitoriacls:
     nome_fornitore:

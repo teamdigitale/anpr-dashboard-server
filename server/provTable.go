@@ -6,6 +6,7 @@ import (
 	"sync"
 )
 
+//ProvinciaMap {"AP":{ProvinciaExt:"Ascoli Piceno", Zona:"Marche Centro" }}
 type ProvincieMap struct {
 	Map map[string]Provincia
 }
@@ -15,15 +16,15 @@ type Provincia struct {
 }
 
 var instance *ProvincieMap
-var mu sync.Mutex
+var onceVC sync.Once
 
+//GetProvincieMapInstance is the singleton thread safe implementation - loads in memory the prov.tsv Dicionary and returns a Map with prov code as key
 func GetProvincieMapInstance() *ProvincieMap {
-	if instance == nil {
-		mu.Lock()
-		defer mu.Unlock()
+	onceVC.Do(func() {
+		//for thread safety a mutex acquires the lock on the instance creation
 		instance = &ProvincieMap{}
 		instance.Map = make(map[string]Provincia)
-		f, err := os.Open("./vc/prov.tsv")
+		f, err := os.Open(GetServerConfig().StorageOptions.Vocabularies + "prov.tsv")
 		if err != nil {
 			panic(err)
 		}
@@ -38,6 +39,6 @@ func GetProvincieMapInstance() *ProvincieMap {
 
 		defer f.Close()
 
-	}
+	})
 	return instance
 }

@@ -1,5 +1,6 @@
 package main
 
+//TODO implement logger https://github.com/gin-contrib/logger
 import (
 	"bufio"
 	"bytes"
@@ -8,19 +9,22 @@ import (
 	"flag"
 	"html/template"
 	"io/ioutil"
-	"log"
 	"net"
 	"net/http"
+	"os"
 	"path"
 	"time"
 
 	"github.com/ccontavalli/goutils/email"
 	"github.com/ccontavalli/goutils/gin/gtemplates"
 	"github.com/ccontavalli/goutils/templates"
+	"github.com/gin-contrib/logger"
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-contrib/sessions/cookie"
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/securecookie"
+	"github.com/rs/zerolog"
+	"github.com/rs/zerolog/log"
 	"golang.org/x/crypto/acme/autocert"
 	"gopkg.in/yaml.v2"
 )
@@ -67,7 +71,7 @@ func ReadOrCreateKey(path string) (*SecureKeys, error) {
 			return &keys, nil
 		}
 	}
-	log.Printf("GENERATING NEW KEYS - %s - %v\n", path, err)
+	log.Info().Msgf("GENERATING NEW KEYS - %s - %v\n", path, err)
 
 	keys := SecureKeys{securecookie.GenerateRandomKey(32), securecookie.GenerateRandomKey(32)}
 	blob, err := json.Marshal(keys)
@@ -122,29 +126,23 @@ func main() {
 
 	keys, err := ReadOrCreateKey(*gCookiekeys)
 	if err != nil {
-		log.Fatal("Could not create keys - ", err)
+		panic(err)
 	}
 
 	googleOauth, err := NewOauthAuthenticator(*gOauthCreds, "/auth/google/callback", keys)
 	if err != nil {
-		log.Fatal("Could not initialize authenticator - ", err)
+		panic(err)
 	}
+	//Initialize the server config
 
-	var config *ServerConfig
-	if *gConfigfile != "" {
-		config, err = NewServerConfigFromFile(*gConfigfile)
-		if err != nil {
-			log.Fatal("Could not read configuration file - ", err)
-		}
-		log.Printf("LOADED CONFIG FILE %s", *gConfigfile)
-	}
+	config := InitServerConfigFromFile(*gConfigfile)
 
 	urloptions := DefaultUrlManagerOptions()
 	if config != nil && config.Options != nil {
 		urloptions = *config.Options.Merge(urloptions)
 	} else {
 		if *gRoot == "" {
-			log.Fatal("You must specify --root flag - when no config file or no Options are provided")
+			log.Fatal().Msg("You must specify --root flag - when no config file or no Options are provided")
 		}
 	}
 	if *gRoot != "" {
@@ -161,38 +159,38 @@ func main() {
 
 	htmlRender, err := templates.NewStaticTemplatesFromDir(nil, *gWtemplates, nil)
 	if err != nil {
-		log.Fatal("Could not initialize web templates - ", err)
+		log.Fatal().Err(err)
 	}
 
 	emailRender, err := templates.NewStaticTemplatesFromDir(nil, *gEtemplates, nil)
 	if err != nil {
-		log.Fatal("Could not initialize email templates - ", err)
+		log.Fatal().Err(err)
 	}
 
 	emailSender, err := email.NewMailSenderFromConfigFile(*gEmailCreds, yaml.Unmarshal, emailRender)
 	if err != nil {
-		log.Fatal("Could not initialize email sender - ", err)
+		log.Fatal().Err(err)
 	}
 
 	emailAuthenticator, err := NewEmailAuthenticator("/auth/email/send-validation", "/auth/email/validate", "validation", emailSender, authorizationManager, nil)
 	if err != nil {
-		log.Fatal("Could not initialize email validator - ", err)
+		log.Fatal().Err(err)
 	}
 
 	urlmanager, err := NewUrlManager(urloptions, UrlManagerAuthenticators{googleauth: googleOauth, emailauth: emailAuthenticator}, authorizationManager, htmlRender)
 	if err != nil {
-		log.Fatal("Could not initialize urlmanager - ", err)
+		log.Fatal().Err(err)
 	}
 
 	storageManager, err := NewStorageManager(storageOptions, authorizationManager, emailSender, "updatecomuni")
 	if err != nil {
-		log.Fatal("Could not initialize storage manager - ", err)
+		log.Fatal().Err(err)
 	}
 	defer storageManager.Close()
 
 	_, err = NewAlertManager(storageOptions, config, emailSender, map[string]string{REACTIVE: "alert_outofdate", PROACTIVE: "alert_closetodate"})
 	if err != nil {
-		log.Fatal("Could not initialize alert manager - ", err)
+		log.Fatal().Err(err)
 	}
 
 	// Routing section
@@ -207,6 +205,17 @@ func main() {
 	store := cookie.NewStore(keys.HashKey, keys.EncryptionKey)
 	router.Use(sessions.Sessions("goospel", store))
 	router.Use(gin.Recovery())
+
+	//Logger
+	zerolog.SetGlobalLevel(zerolog.InfoLevel)
+	log.Logger = log.Output(
+		zerolog.ConsoleWriter{
+			Out:     os.Stderr,
+			NoColor: false,
+		},
+	)
+	//zerolog.TimeFieldFormat = zerolog.TimeFormatUnix
+	router.Use(logger.SetLogger())
 
 	// Static URLS take precedence over any automatically computed URL.
 	// Note that static URLs cannot be updated at run time. Need restart.
@@ -230,6 +239,16 @@ func main() {
 	router.POST("/comune/deleteComment", urlmanager.OnlyLoggedHandler(storageManager.DeleteComment))
 
 	if *gMode == "debug" {
+
+		zerolog.SetGlobalLevel(zerolog.DebugLevel)
+		subLog := zerolog.New(os.Stdout).With().
+			Str("gin request", "").
+			Logger()
+
+		router.Use(logger.SetLogger(logger.Config{
+			Logger: &subLog,
+			UTC:    true,
+		}))
 		router.GET("/debug", urlmanager.Debug)
 		router.GET("/panic", func(c *gin.Context) { panic("silvestro vive") })
 	}
@@ -272,7 +291,7 @@ func main() {
 	// If both http and https, http always redirects to https.
 	if *gListenonHttps != "" {
 		if config == nil || len(config.Hostnames) <= 0 {
-			log.Fatal("When using https, you must specify a config file with a list of hostnames")
+			log.Fatal().Msg("When using https, you must specify a config file with a list of hostnames")
 		}
 
 		go http.ListenAndServe(*gListenonHttp, http.HandlerFunc(redirect))

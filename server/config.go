@@ -1,10 +1,12 @@
 package main
 
 import (
+	"sort"
+	"sync"
+
 	"github.com/ccontavalli/goutils/config"
 	"github.com/ccontavalli/goutils/misc"
-	"sort"
-	//"log"
+	"github.com/rs/zerolog/log"
 )
 
 type AccessConfig struct {
@@ -107,8 +109,34 @@ type ServerConfig struct {
 	Groups []Group
 }
 
-func NewServerConfigFromFile(filename string) (*ServerConfig, error) {
-	result := ServerConfig{}
-	err := config.ReadYamlConfigFromFile(filename, &result)
-	return &result, err
+var serverConfigInst *ServerConfig
+var once sync.Once
+
+//Loads the configuration from file. This method needs to be call BEFORE #GetServerConfig which expect the configuration to be already initialized
+func InitServerConfigFromFile(filename string) *ServerConfig {
+
+	//ensure that this block of code is executed once
+	once.Do(func() {
+		log.Debug().Msgf("Load configuration from file :%s", filename)
+
+		serverConfigInst = &ServerConfig{}
+		err := config.ReadYamlConfigFromFile(filename, serverConfigInst)
+		if err != nil {
+			log.Fatal().Msgf("error %s", err)
+		}
+
+	})
+	log.Debug().Msgf("Configuration loaded %v", serverConfigInst)
+
+	return serverConfigInst
+}
+func GetServerConfig() *ServerConfig {
+
+	log.Debug().Msgf("Configuration file %v", serverConfigInst)
+
+	if serverConfigInst == nil {
+		panic("Config file not set. Please be sure tu initialize first using NewServerConfigFromFile  ")
+	}
+	return serverConfigInst
+
 }
