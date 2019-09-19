@@ -1,0 +1,39 @@
+#
+# Docker compose for anpr server.
+#
+# Put your DEVELOPMENT config and creds file into
+# a new ./vault directory and ensure
+# that it references /srv/db/sqlite.db
+#
+# Put the sqlite database in ./vault/db
+# and name it sqlite.db
+#
+# Run the compose file
+#
+#   UID=$UID docker-compose p
+#
+version: '3.0'
+
+services:
+
+  server:
+    build: .
+    user: "$UID"
+    volumes:
+    - ./vault/:/srv/anpr/vault/:z
+    - ./vault/db/:/srv/db/:z
+    entrypoint:
+    - "/srv/anpr/server/dashboard"
+    - "--http-listen-on=[::]:8080"
+    # Config file
+    - "--config-file=/srv/anpr/vault/config.yaml"
+    # Credentials
+    - "--cookie-creds=/srv/anpr/vault/cookie-creds.json"
+    - "--email-creds=/srv/anpr/vault/email-creds.yaml"
+    - "--oauth-creds=/srv/anpr/vault/oauth-creds.yaml"
+    # Other files actually embedded on the docker image.
+    - "--web-templates=/srv/anpr/server/templates/"
+    - "--email-templates=/srv/anpr/server/emails/"
+    - "--static-content=/srv/anpr/server/static/"
+
+
