@@ -153,13 +153,15 @@ func toFeature(comune sqlite.Comune) *geojson.Feature {
 	feature.SetProperty("ZONA", provincie.Map[comune.Province].Zona)
 	feature.SetProperty("popolazione", comune.Population)
 	feature.SetProperty("popolazione_aire", comune.PopulationAIRE)
-
-	addDateToFeatureIfNotEmpty(feature, "data_subentro", comune.DataSubentro)
-	addDateToFeatureIfNotEmpty(feature, "data_presubentro", comune.DataPresubentro)
-	addDateToFeatureIfNotEmpty(feature, "prima_data_subentro", comune.Subentro.From)
-	addDateToFeatureIfNotEmpty(feature, "ultima_data_subentro", comune.Subentro.To)
-	addDateToFeatureIfNotEmpty(feature, "data_subentro_preferita", comune.Subentro.PreferredDate)
-
+	if comune.DataSubentro.Valid {
+		addDateToFeatureIfNotEmpty(feature, "data_subentro", comune.DataSubentro)
+	} else {
+		//log.Printf("subentro invalid %s", comune.Name)
+		addDateToFeatureIfNotEmpty(feature, "data_presubentro", comune.DataPresubentro)
+		addDateToFeatureIfNotEmpty(feature, "prima_data_subentro", comune.Subentro.From)
+		addDateToFeatureIfNotEmpty(feature, "ultima_data_subentro", comune.Subentro.To)
+		addDateToFeatureIfNotEmpty(feature, "data_subentro_preferita", comune.Subentro.PreferredDate)
+	}
 	return feature
 }
 
