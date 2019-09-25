@@ -633,7 +633,7 @@ func SearchComuni(db *sql.DB, searchFilter SearchFilter) []Comune {
 
 		 FROM COMUNE co
 	 		INNER JOIN  FORNITORE fn ON fn.ID = co.ID_FORNITORE
-			LEFT OUTER JOIN SUBENTRO su ON co.ID = su.ID_COMUNE WHERE  co.DATA_CESSAZIONE IS NULL
+			LEFT OUTER JOIN SUBENTRO su ON co.ID = su.ID_COMUNE WHERE  (co.DATA_CESSAZIONE IS NULL OR co.NAME==co.COMUNE_CONFLUENZA)
 		 `)
 	var args []interface{}
 
