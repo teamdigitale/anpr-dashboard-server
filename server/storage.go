@@ -728,6 +728,7 @@ func (state *ComuneState) ToComune() sqlite.Comune {
 	comune.TipoCessazione = null.StringFrom(state.TipoCessazione)
 	comune.ComuneConfluenza = null.StringFrom(state.ComuneDiConfluenza)
 	//aggiungi comune di cessazione
+	comune.Province = state.SiglaProvincia
 	return comune
 }
 
