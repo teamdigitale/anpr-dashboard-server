@@ -624,6 +624,7 @@ func (manager *StorageManager) PutPianoSubentro(ctx *gin.Context) {
 type ComuneState struct {
 	CodiceIstat             string `xml:"CODICEISTAT"`
 	SiglaProvincia          string `xml:"SIGLAPROVINCIA"`
+	Regione                 string `xml:"REGIONE"`
 	SiglaPrefettura         string `xml:"SIGLAPREFETTURA"`
 	Name                    string `xml:"DENOMINAZIONE"`
 	DataSubentro            string `xml:"DATASUBENTRO"`
@@ -729,6 +730,8 @@ func (state *ComuneState) ToComune() sqlite.Comune {
 	comune.ComuneConfluenza = null.StringFrom(state.ComuneDiConfluenza)
 	//aggiungi comune di cessazione
 	comune.Province = state.SiglaProvincia
+	comune.Region = strings.Title(strings.ToLower(state.Regione))
+
 	return comune
 }
 
