@@ -1,3 +1,8 @@
+# ANPR Dashboard Server
+
+This project exposes the data about the migration status of Italian municipalities
+to the National Registry.
+
 In this directory you can find everything that is needed for the ANPR dashboard.
 
 Specifically:
@@ -7,24 +12,41 @@ Specifically:
 
 2) **site** - the site itself.
 
+3) **openapi** - the OpenAPI 3 specifications of the exposed API.
 
- ## Alcune query da eseguire sul server
+
+## API
+
+Il server eroga delle API sia pubbliche che private.
+Quelle pubbliche sono descritte nelle [specifiche OpenAPI 3](openapi/anpr-dashboard.yaml).
+
+E' possibile recuperare lo stato dei comuni sia puntualmente
+che in maniera massiva.
+
+Un esempio di processamento dei dati è disponibile nel
+[file di esempio](openapi/migrazione-anpr.py)
+
+## Alcune query da eseguire sul server
+
 Cerca fornitore per un COMUNE
 
- ```SELECT C.NAME,F.NAME as NOME_FORNITORE FROM COMUNE C
+```
+SELECT C.NAME,F.NAME as NOME_FORNITORE FROM COMUNE C
 INNER JOIN FORNITORE F ON F.ID = C.ID_FORNITORE
 WHERE UPPER(C.NAME)  LIKE  "%CARATE BRIANZA%"```
 
 SELECT ID,NAME FROM FORNITORE WHERE  UPPER(FORNITORE.NAME) LIKE "%SYSTEM%"
-
 ```
+
 Cambia fornitore per un comune
+
 ```
 UPDATE COMUNE SET ID_FORNITORE = (SELECT ID FROM FORNITORE WHERE  UPPER(FORNITORE.NAME)="AP SYSTEMS") WHERE COMUNE.NAME= "CARATE BRIANZA"
 ```
 
 
 Query estrazione del piano di subentro
+
 ```
 SELECT COMUNE.NAME,
 FORNITORE.NAME as FORNITORE,
@@ -38,10 +60,12 @@ INNER JOIN SUBENTRO on SUBENTRO.ID_COMUNE = COMUNE.ID ORDER BY SUBENTRO.RANGE_FR
 ```
 
 Per estrarre la query di subentro eseguire il comando dalla location del db di dashboard
+
 ```sqlite3 -header -csv db.sqlite <query.sql > subentro.csv```
 
 
 Fornitori che hanno inserito alcuni comuni
+
 ```
 SELECT FORNITORE.NAME as FORNITORE,
 COUNT(FORNITORE.NAME)as NUMERO
@@ -53,6 +77,7 @@ GROUP BY FORNITORE.NAME;
 ```
 
 Somma dei comuni non subentrati
+
 ```
 SELECT SUM(COMUNE.POPOLAZIONE)
 FROM COMUNE
@@ -61,6 +86,7 @@ INNER JOIN SUBENTRO on SUBENTRO.ID_COMUNE = COMUNE.ID AND SUBENTRO.RANGE_TO <CAS
 ```
 
 Inserimento di un COMUNE
+
 ```
 INSERT INTO COMUNE (NAME,ID_FORNITORE,PROVINCIA,CODICE_ISTAT,POSTAZIONI,POPOLAZIONE,REGION,LAT,LON)
 VALUES("BELVEDERE MARITTIMO",4,"CS","078015",4,9240,"CALABRIA",39.6332469,15.8417781);
@@ -82,6 +108,7 @@ ALTER TABLE COMUNE ADD  column POPOLAZIONE_AIRE INT
 ```
 
 Update manuale delle date di subentro di un comune
+
 ```
 UPDATE SUBENTRO SET  RANGE_FROM =  x
 ,RANGE_TO =  strftime('%s','2017-11-30 00:00:00')
@@ -97,6 +124,7 @@ go ins```
 
 
  1. **setup configurazioni varie e build del progetto**
+
  ```
  cd anpr-dashboard-server/server
  mkdir creds
@@ -107,15 +135,18 @@ go ins```
  ```
 
  2. **run del server**
- ```
+
+```
  ./server --mode=debug --config-file=/<PATH VOSTRO WORKSPACE>/anpr-dashboard-server/dashboard-subentro/subentroconfig.yaml
- ```
+```
 
  3. **in caso ci fossero problemi con le dipendenze...**
- ```
+
+```
 git config --global --add url."git@github.com:".insteadOf "https://github.com/"
 get ./...
- ```
+```
+
 e poi ripetere il punto 3
 
 
