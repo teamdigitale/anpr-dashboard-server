@@ -66,7 +66,6 @@ info:
   contact:
     email: roberto@teamdigitale.governo.it
     name: Roberto Polli
-    url: https://twitter.com/ioggstream
   x-project: anpr
   # L'audience delle API. Attualmente e' definito solamente
   #   la tipologia `public`.
@@ -125,8 +124,8 @@ paths:
     get:
       summary: Recupera lo stato di migrazione di un comune.
       description: |
-        Si connette ad IndicePA e recupera le informazioni su
-        un'amministrazione tramite il codice IPA.
+        Recupera le informazioni sullo stato di migrazione ANPR
+        relativo ad un comune e ritorna un JSON
       operationId: get_comune
       tags:
       - public
@@ -148,7 +147,9 @@ paths:
     get:
       summary: Mostra tutti i dati.
       description: |
-        Recupera i dati di tutti i comuni.
+        Recupera i dati di tutti i comuni ed include
+        le informazioni riassuntive, quelle geografiche
+        e puntuali.
       operationId: get_all_data
       tags:
       - public
