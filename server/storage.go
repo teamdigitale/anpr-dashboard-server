@@ -461,7 +461,7 @@ func (manager *StorageManager) Update(ctx *gin.Context) {
 	}
 	if given_comune.Subentro.PreferredDate.Valid {
 
-		info := sqlite.GetSubentroInfo(manager.db, comune.Subentro.PreferredDate)
+		info := sqlite.GetSubentroInfo(manager.db, given_comune.Subentro.PreferredDate)
 		log.Printf("Check info of subentro for date %v, numero comuni:%v, popolazione:%v", given_comune.Subentro.PreferredDate, info.Comuni, info.Population)
 
 		var limit int64 = 50
@@ -472,7 +472,7 @@ func (manager *StorageManager) Update(ctx *gin.Context) {
 		}
 
 		if comuniInfoValue > limit {
-			res.Error = fmt.Sprintf("ERRORE: limite raggiunto di %d comuni nella data indicata", limit)
+			res.Error = fmt.Sprintf("ERRORE: Update impossibile limite raggiunto di %d comuni nella data indicata", limit)
 			log.Print(err)
 			ctx.JSON(400, res)
 			return
