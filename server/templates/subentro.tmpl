@@ -342,7 +342,7 @@
                         <li>La data minima deve essere ad almeno <strong>20 giorni dalla data odierna nel caso il comune non abbia effettuato il presubentro o le smartcard non siano arrivate in prefettura</strong>, altrimenti <strong>5 giorni</strong></li>
                         <li>Il range temporale non può superare i 30 giorni di ampiezza</li>
                         <li>La data preferita può essere aggiornata successivamente</li>
-                        <li>Il sistema accetta un numero massimo di <strong>50 comuni e 3 Milioni di abitanti</strong> al giorno</li>
+                        <li>Il sistema accetta un numero massimo di <strong>55 comuni e 3 Milioni di abitanti</strong> al giorno</li>
                         </ul>
               </div>
             </div>
@@ -699,7 +699,7 @@ comments = {
     var newDateString = $(this).val();
     $.get("api/getSubentroInfo/"+$(this).val(), function( data ) {
      $("#comuni_info_text").show();
-     $("#comuni_info_text").html("Il " +newDateString+"  sono stati già pianificati <strong>"+data.Comuni+" comuni</strong>. Disponibilita' residua: <strong>"+(50-data.Comuni)+"</strong>");
+     $("#comuni_info_text").html("Il " +newDateString+"  sono stati già pianificati <strong>"+data.Comuni+" comuni</strong>. Disponibilita' residua: <strong>"+(55-data.Comuni)+"</strong>");
      $("#alert-msg").show();
      $("#loading").hide();
     });  

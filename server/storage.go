@@ -464,7 +464,7 @@ func (manager *StorageManager) Update(ctx *gin.Context) {
 		info := sqlite.GetSubentroInfo(manager.db, given_comune.Subentro.PreferredDate)
 		log.Printf("Check info of subentro for date %v, numero comuni:%v, popolazione:%v", given_comune.Subentro.PreferredDate, info.Comuni, info.Population)
 
-		var limit int64 = 50
+		var limit int64 = 55
 		var comuniInfoValue int64
 
 		if info.Comuni.Valid {
