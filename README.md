@@ -2,7 +2,7 @@
 
 The ANPR dashboard provides data related to the migration status of Italian municipalities to the National Registry.
 
-The service exposed both data through an API interface and through a UI, through which it's possible to both download existing datasets and upload new data in CSV format.
+The service exposes data both through an API interface and through a UI, through which it's possible to both download existing datasets and upload new data in CSV format.
 
 Some of the folders in this repository are particularly significant:
 
