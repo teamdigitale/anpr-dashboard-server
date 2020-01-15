@@ -1,153 +1,142 @@
 # ANPR Dashboard Server
 
-This project exposes the data about the migration status of Italian municipalities
-to the National Registry.
+The ANPR dashboard provides data related to the migration status of Italian municipalities to the National Registry.
 
-In this directory you can find everything that is needed for the ANPR dashboard.
+The service exposed both data through an API interface and through a UI, through which it's possible to both download existing datasets and upload new data in CSV format.
 
-Specifically:
+Some of the folders in this repository are particularly significant:
 
-1) **converter** - containing a tool to process the "schede" collected by SOGEI
-   into json files, by adding geolocation information from google maps.
+* **converter**: a tool to convert the data (schede) collected by [SOGEI](http://www.sogei.it/) into json files, by adding geolocation informations from Google maps.
 
-2) **site** - the site itself.
+* **site**: the website that shows the main statistical data, that allow users to download a csv file with the latest data and to upload a csv with new data
 
-3) **openapi** - the OpenAPI 3 specifications of the exposed API.
+* **openapi**: the OpenAPI 3 specification of the APIs exposed
 
+## APIs
 
-## API
+The service exposes both some public, as well some private APIs. The public ones are described in the [OpenAPI 3 specification](openapi/anpr-dashboard.yaml).
 
-Il server eroga delle API sia pubbliche che private.
-Quelle pubbliche sono descritte nelle [specifiche OpenAPI 3](openapi/anpr-dashboard.yaml).
+Through the APIs, it's -for example- possible to retrieve the state of the migration to ANPR for single a municipality or for all of them together.
 
-E' possibile recuperare lo stato dei comuni sia puntualmente
-che in maniera massiva.
+## Sandbox environments
 
-Un esempio di processamento dei dati è disponibile nel
-[file di esempio](openapi/migrazione-anpr.py)
+For development purposes the project can also be run locally, directly on the developer machine, or in form of a Docker container. Following, both procedures are explained.
 
-## Alcune query da eseguire sul server
+### Run the project directly on the local machine
 
-Cerca fornitore per un COMUNE
+```shell
+# Configuration
+cd anpr-dashboard-server/server
+mkdir creds
+cp {THREE-CONFIG-FROM-ADMINS} creds
+mkdir dashboard-subentro
+cp {ANOTHER-CONFIG-FILE-FROM-ADMINS} subentroconfig.yaml dashboard-subentro/
 
-```
-SELECT C.NAME,F.NAME as NOME_FORNITORE FROM COMUNE C
-INNER JOIN FORNITORE F ON F.ID = C.ID_FORNITORE
-WHERE UPPER(C.NAME)  LIKE  "%CARATE BRIANZA%"```
+# Build the project
+make build
 
-SELECT ID,NAME FROM FORNITORE WHERE  UPPER(FORNITORE.NAME) LIKE "%SYSTEM%"
-```
-
-Cambia fornitore per un comune
-
-```
-UPDATE COMUNE SET ID_FORNITORE = (SELECT ID FROM FORNITORE WHERE  UPPER(FORNITORE.NAME)="AP SYSTEMS") WHERE COMUNE.NAME= "CARATE BRIANZA"
+# Run the service
+./server --mode=debug --config-file=/<PATH-TO-YOUR-WORKSPACE>/anpr-dashboard-server/dashboard-subentro/subentroconfig.yaml
 ```
 
+### Run the project as a Docker container
 
-Query estrazione del piano di subentro
+A `Dockerfile` and a `docker-compose.yaml` files are in the root of this repository.
 
+Create a new *vault* directory in the root of this repository. Put your development configurations and credentials in it. Make sure they reference */srv/db/sqlite.db*. Put the sqlite database in *vault/db* and name it *sqlite.db*
+
+To build the local test environment run:
+
+```shell
+UID=$UID docker-compose up -d
 ```
+
+The website and the APIs should now be accessible on port *8080*. While the website is accessible at the root, the APIs can be accessed under the path */api*
+
+To bring down the test environment and remove the containers use
+
+```shell
+docker-compose down
+```
+
+## Query examples
+
+Search the supplier name (*fornitore*), given a municipality name (*comune*).
+
+```sql
+SELECT C.NAME, F.NAME as NOME_FORNITORE FROM COMUNE C
+INNER JOIN FORNITORE F ON F.ID=C.ID_FORNITORE
+WHERE UPPER(C.NAME) LIKE  "%CARATE BRIANZA%"
+
+SELECT ID, NAME FROM FORNITORE WHERE UPPER(FORNITORE.NAME) LIKE "%SYSTEM%"
+```
+
+Change the supplier name (*fornitore*) for a given municipality (*comune*).
+
+```sql
+UPDATE COMUNE SET ID_FORNITORE = (SELECT ID FROM FORNITORE WHERE  UPPER(FORNITORE.NAME)="AP SYSTEMS") WHERE COMUNE.NAME="CARATE BRIANZA"
+```
+
+Extract the municipality takeover plan
+
+```sql
 SELECT COMUNE.NAME,
 FORNITORE.NAME as FORNITORE,
 COMUNE.POPOLAZIONE,  
-date(SUBENTRO.RANGE_FROM,'unixepoch') as DATE_FROM,
-date(SUBENTRO.RANGE_TO,'unixepoch') as DATE_TO
-
+date(SUBENTRO.RANGE_FROM, 'unixepoch') as DATE_FROM,
+date(SUBENTRO.RANGE_TO, 'unixepoch') as DATE_TO
 FROM COMUNE
-INNER JOIN FORNITORE on FORNITORE.ID = COMUNE.ID_FORNITORE
-INNER JOIN SUBENTRO on SUBENTRO.ID_COMUNE = COMUNE.ID ORDER BY SUBENTRO.RANGE_FROM ASC;
+INNER JOIN FORNITORE on FORNITORE.ID=COMUNE.ID_FORNITORE
+INNER JOIN SUBENTRO on SUBENTRO.ID_COMUNE=COMUNE.ID ORDER BY SUBENTRO.RANGE_FROM ASC;
 ```
 
-Per estrarre la query di subentro eseguire il comando dalla location del db di dashboard
+To extract the municipality takeover query
 
-```sqlite3 -header -csv db.sqlite <query.sql > subentro.csv```
-
-
-Fornitori che hanno inserito alcuni comuni
-
+```shell
+sqlite3 -header -csv db.sqlite < query.sql > subentro.csv
 ```
+
+Get the list of suppliers that still haven't helped any municipality
+
+```sql
 SELECT FORNITORE.NAME as FORNITORE,
-COUNT(FORNITORE.NAME)as NUMERO
+COUNT(FORNITORE.NAME) as NUMERO
 FROM COMUNE
-INNER JOIN FORNITORE on FORNITORE.ID = COMUNE.ID_FORNITORE
-INNER JOIN SUBENTRO on SUBENTRO.ID_COMUNE = COMUNE.ID
+INNER JOIN FORNITORE on FORNITORE.ID=COMUNE.ID_FORNITORE
+INNER JOIN SUBENTRO on SUBENTRO.ID_COMUNE=COMUNE.ID
 WHERE COMUNE.DATA_SUBENTRO IS NULL
 GROUP BY FORNITORE.NAME;
 ```
 
-Somma dei comuni non subentrati
+Sum of the municipalities that have not yet taken over
 
-```
+```sql
 SELECT SUM(COMUNE.POPOLAZIONE)
 FROM COMUNE
-INNER JOIN FORNITORE on FORNITORE.ID = COMUNE.ID_FORNITORE
-INNER JOIN SUBENTRO on SUBENTRO.ID_COMUNE = COMUNE.ID AND SUBENTRO.RANGE_TO <CAST(strftime('%s', '2017-12-31') AS INT) AND COMUNE.SUBENTRO_DATE IS NULL  
+INNER JOIN FORNITORE on FORNITORE.ID=COMUNE.ID_FORNITORE
+INNER JOIN SUBENTRO on SUBENTRO.ID_COMUNE=COMUNE.ID AND SUBENTRO.RANGE_TO <CAST(strftime('%s', '2017-12-31') AS INT) AND COMUNE.SUBENTRO_DATE IS NULL  
 ```
 
-Inserimento di un COMUNE
+Some examples of municipalities insertions:
 
-```
-INSERT INTO COMUNE (NAME,ID_FORNITORE,PROVINCIA,CODICE_ISTAT,POSTAZIONI,POPOLAZIONE,REGION,LAT,LON)
-VALUES("BELVEDERE MARITTIMO",4,"CS","078015",4,9240,"CALABRIA",39.6332469,15.8417781);
+```sql
+INSERT INTO COMUNE (NAME, ID_FORNITORE, PROVINCIA, CODICE_ISTAT, POSTAZIONI, POPOLAZIONE, REGION, LAT, LON)
+VALUES("BELVEDERE MARITTIMO", 4, "CS", "078015", 4, 9240, "CALABRIA", 39.6332469, 15.8417781);
 
+INSERT INTO COMUNE (NAME, ID_FORNITORE, PROVINCIA, CODICE_ISTAT, POSTAZIONI, POPOLAZIONE, REGION, LAT, LON)
+VALUES("MONTECCHIO EMILIA", 3, "RE", "035027", 0, 10622, "EMILIA ROMAGNA", 44.7084791, 10.4255221);
 
-INSERT INTO COMUNE (NAME,ID_FORNITORE,PROVINCIA,CODICE_ISTAT,POSTAZIONI,POPOLAZIONE,REGION,LAT,LON)
-VALUES("MONTECCHIO EMILIA",3,"RE","035027",0,10622,"EMILIA ROMAGNA",44.7084791,10.4255221);
+INSERT INTO COMUNE (NAME, ID_FORNITORE, PROVINCIA, CODICE_ISTAT, POSTAZIONI, POPOLAZIONE, REGION, LAT, LON)
+VALUES("GARDA", 23, "VR", "023036", 3, 4126, "VENETO", 45.5787644, 10.6852263);
 
-INSERT INTO COMUNE (NAME,ID_FORNITORE,PROVINCIA,CODICE_ISTAT,POSTAZIONI,POPOLAZIONE,REGION,LAT,LON)
-VALUES("GARDA",23,"VR","023036",3,4126,"VENETO",45.5787644,10.6852263);
-
-
-
-INSERT INTO COMUNE (NAME,ID_FORNITORE,PROVINCIA,CODICE_ISTAT,POSTAZIONI,POPOLAZIONE,REGION,LAT,LON)
-VALUES("TRIBIANO",22,"MI","015222",2,3535,"LOMBARDIA",45.4126596,9.3673043);
-
-ALTER TABLE COMUNE ADD  column POPOLAZIONE_AIRE INT
-
+INSERT INTO COMUNE (NAME, ID_FORNITORE, PROVINCIA, CODICE_ISTAT, POSTAZIONI, POPOLAZIONE, REGION, LAT, LON)
+VALUES("TRIBIANO", 22, "MI", "015222", 2, 3535, "LOMBARDIA", 45.4126596, 9.3673043);
 ```
 
-Update manuale delle date di subentro di un comune
+Update the takeover dates for a specific municipality
 
+```sql
+UPDATE SUBENTRO
+SET RANGE_FROM=x, RANGE_TO=strftime('%s','2017-11-30 00:00:00'), FINAL_DATE=strftime('%s','2017-11-27 00:00:00')
+WHERE ID_COMUNE=(SELECT ID FROM COMUNE WHERE NAME="CASTELLEONE")
 ```
-UPDATE SUBENTRO SET  RANGE_FROM =  x
-,RANGE_TO =  strftime('%s','2017-11-30 00:00:00')
-,FINAL_DATE = strftime('%s','2017-11-27 00:00:00')
-WHERE ID_COMUNE = (SELECT ID FROM COMUNE WHERE NAME="CASTELLEONE")
-```
-
-go ins```
-
-**Metodo alternativo per l'installazione della propria sandbox**
-
-*se volete mantenere il codice sorgente in un vostro workspace fuori dal $GOPATH...*
-
-
- 1. **setup configurazioni varie e build del progetto**
-
- ```
- cd anpr-dashboard-server/server
- mkdir creds
- cp <TRE FILE DI CONFIGURAZIONE DA RICHIEDERE> creds
- mkdir dashboard-subentro
- cp <PATH ALTRO FILE DI CONFIG DA RICHIEDERE>subentroconfig.yaml dashboard-subentro/
- make build
- ```
-
- 2. **run del server**
-
-```
- ./server --mode=debug --config-file=/<PATH VOSTRO WORKSPACE>/anpr-dashboard-server/dashboard-subentro/subentroconfig.yaml
-```
-
- 3. **in caso ci fossero problemi con le dipendenze...**
-
-```
-git config --global --add url."git@github.com:".insteadOf "https://github.com/"
-get ./...
-```
-
-e poi ripetere il punto 3
-
-
-
