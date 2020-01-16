@@ -1,8 +1,10 @@
 # ANPR Dashboard Server
 
-The ANPR dashboard provides data related to the migration status of Italian municipalities to the National Registry.
+The ANPR dashboard server is a go-based application that provides data related to the migration status of Italian municipalities to the National Registry.
 
 The service exposes data both through an API interface and through a UI, through which it's possible to both download existing datasets and upload new data in CSV format.
+
+## Main components
 
 Some of the folders in this repository are particularly significant:
 
@@ -11,6 +13,12 @@ Some of the folders in this repository are particularly significant:
 * **site**: the website that shows the main statistical data, that allow users to download a csv file with the latest data and to upload a csv with new data
 
 * **openapi**: the OpenAPI 3 specification of the APIs exposed
+
+## GUI/dashboard
+
+The application also exposes a web-based GUI that can be accessed from website root ('/') once the server is running.
+
+Through the GUI it's possible to view the main statistical data, download a csv file with the latest datasets and to upload a csv with new data.
 
 ## APIs
 
