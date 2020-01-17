@@ -1,16 +1,3 @@
-# Docker compose for anpr server.
-
-# Put your DEVELOPMENT config and creds file into
-# a new ./vault directory and ensure
-# that it references /srv/db/sqlite.db
-
-# * Put the sqlite database in ./vault/db
-# * and name it sqlite.db
-#
-# Run the compose file
-#
-# UID=$UID docker-compose p
-
 version: '3.0'
 
 services:
