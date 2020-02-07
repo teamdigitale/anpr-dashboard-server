@@ -67,6 +67,12 @@ To bring down the test environment and remove the containers use
 docker-compose down
 ```
 
+## The cronjob Docker image and scripts
+
+A custom script is periodically run to fetch the latest ANPR data and feed the dashboards. This script is usually run through in form of a Docker container on top of Kubernetes.
+
+The script and the *Dockerfile* and a *docker-compose.yaml* file are located in the [cronjob](cronjob) folder of this repository.
+
 ## Query examples
 
 The [query examples page](QUERY_EXAMPLES.md) provides examples around relevant queries to extract useful informations from the database.
