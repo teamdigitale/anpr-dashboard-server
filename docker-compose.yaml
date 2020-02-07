@@ -5,8 +5,9 @@ services:
     build: .
     user: "$UID"
     volumes:
-    - ./vault/:/srv/anpr/vault/:z
-    - ./vault/db/:/srv/db/:z
+    - vault:/srv/anpr/vault
+    - db:/srv/anpr/db
+    - cache:/var/cache/dashboard_scripts
     entrypoint:
     - "/srv/anpr/server/dashboard"
     - "--http-listen-on=[::]:8080"
