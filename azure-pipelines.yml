@@ -1,10 +1,17 @@
+# Trigger builds only when a commit gets
+# merged to master. Do not trigger PR
+# validation builds.
+# Exclude the path cronjob/*
+# Batch builds if multiple exist.
 trigger:
+  batch: true
   branches:
     include:
     - master
   paths:
     exclude:
     - cronjob/*
+pr: none
 
 resources:
 - repo: self
