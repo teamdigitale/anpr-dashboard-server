@@ -6,6 +6,10 @@
 *.so
 *.dylib
 *.json
+# Allow to have in the repo an empty data.json file
+# under development_demo_data/vault/cookie-creds for
+# local development
+!development_demo_data/vault/cookie-creds/data.json
 # Test binary, build with `go test -c`
 *.test
 

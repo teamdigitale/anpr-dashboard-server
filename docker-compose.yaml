@@ -1,22 +1,35 @@
-version: '3.0'
+version: '3.3'
 
 services:
-  server:
-    build: .
-    user: "$UID"
+
+  anpr_dashboard_server:
+    container_name: anpr_dashboard_server
+    image: teamdigitale/anpr-dashboard-server
+
+    build:
+      context: ./
+      dockerfile: Dockerfile
+
+    ports:
+      - 8080:8080
+
     volumes:
-    - vault:/srv/anpr/vault
-    - db:/srv/anpr/db
-    - cache:/var/cache/dashboard_scripts
+    - ./development_demo_data/vault/config:/srv/anpr/vault/config
+    - ./development_demo_data/vault/cookie-creds:/srv/anpr/vault/cookie-creds
+    - ./development_demo_data/vault/email-creds:/srv/anpr/vault/email-creds
+    - ./development_demo_data/vault/oauth-creds:/srv/anpr/vault/oauth-creds
+    - ./development_demo_data/db:/srv/anpr/db
+    - ./development_demo_data/cache:/var/cache/dashboard_scripts
+
     entrypoint:
     - "/srv/anpr/server/dashboard"
     - "--http-listen-on=[::]:8080"
     # Config file
-    - "--config-file=/srv/anpr/vault/config.yaml"
+    - "--config-file=/srv/anpr/vault/config/data.yaml"
     # Credentials
-    - "--cookie-creds=/srv/anpr/vault/cookie-creds.json"
-    - "--email-creds=/srv/anpr/vault/email-creds.yaml"
-    - "--oauth-creds=/srv/anpr/vault/oauth-creds.yaml"
+    - "--cookie-creds=/srv/anpr/vault/cookie-creds/data.json"
+    - "--email-creds=/srv/anpr/vault/email-creds/data.yaml"
+    - "--oauth-creds=/srv/anpr/vault/oauth-creds/data.yaml"
     # Other files embedded in the Docker image
     - "--web-templates=/srv/anpr/server/templates/"
     - "--email-templates=/srv/anpr/server/emails/"
