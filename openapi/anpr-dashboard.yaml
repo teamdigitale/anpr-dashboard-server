@@ -211,16 +211,22 @@ components:
           properties:
             com_sub:
               type: integer
+              format: int32
             pop_sub:
               type: integer
+              format: int32
             com_pre:
               type: integer
+              format: int32
             pop_pre:
               type: integer
+              format: int32
             pop_aire:
               type: integer
+              format: int32
             pop_pre_aire:
               type: integer
+              format: int32
           required:
             - com_sub
             - pop_sub
@@ -249,10 +255,13 @@ components:
           type: string
         comuni:
           type: integer
+          format: int32
         popolazione:
           type: integer
+          format: int32
         popolazione_aire:
           type: integer
+          format: int32
       required:
         - date
         - comuni
@@ -284,10 +293,14 @@ components:
       properties:
         percentuale_comuni_subentrati:
           type: integer
+          format: int32
         percentuale_comuni_in_presubentro:
           type: integer
+          format: int32
         percentuale_comuni_inattivi:
           type: integer
+          format: int32
+
         nome:
           type: string
       required:
@@ -314,8 +327,10 @@ components:
           type: string
         popolazione:
           type: integer
+          format: int32
         popolazione_aire:
           type: integer
+          format: int32
         prima_data_subentro:
           type: string
         ultima_data_subentro:
