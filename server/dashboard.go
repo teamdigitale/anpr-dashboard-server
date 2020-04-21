@@ -91,10 +91,11 @@ type Summaries struct {
 	PopolazioneAirePreSubentro int `json:"pop_pre_aire"`
 }
 type DashBoardData struct {
-	Geojson   *geojson.FeatureCollection `json:"geojson"`
-	Summaries *Summaries                 `json:"summaries"`
-	Fornitori []FornitoreSums            `json:"fornitori"`
-	Charts    Charts                     `json:"charts"`
+	LastDateTime time.Time                  `json:"lastDateTime"` // "2016-10-21T00:00:00+00:00",
+	Geojson      *geojson.FeatureCollection `json:"geojson"`
+	Summaries    *Summaries                 `json:"summaries"`
+	Fornitori    []FornitoreSums            `json:"fornitori"`
+	Charts       Charts                     `json:"charts"`
 }
 type Charts struct {
 	Subentro    []DailyStats `json:"subentro"`
@@ -214,6 +215,7 @@ func (charts *Charts) updateHistoricalSequence() {
 }
 func GetDashBoardData(comuni []sqlite.Comune) *DashBoardData {
 	dashboardData := DashBoardData{}
+	lastDateTime := time.Now()
 	charts := Charts{}
 	summaries := Summaries{}
 	fornitoriMap := make(map[string]FornitoreStats)
@@ -286,6 +288,7 @@ func GetDashBoardData(comuni []sqlite.Comune) *DashBoardData {
 	//Update the historical increasing sequence
 	charts.updateHistoricalSequence()
 
+	dashboardData.LastDateTime = lastDateTime
 	dashboardData.Fornitori = fornitori
 	dashboardData.Charts = charts
 

@@ -204,6 +204,9 @@ components:
         Un file con tutte le statistiche della dashboard ANPR che include
         i valori di riepilogo e lo stato puntuale dei comuni.
       properties:
+        lastDateTime:
+          type: string
+          format: date-time
         geojson:
           $ref: '#/components/schemas/GeoJson'
         summaries:
