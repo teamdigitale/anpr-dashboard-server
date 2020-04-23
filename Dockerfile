@@ -72,11 +72,12 @@ EXPOSE 8080
 USER nobody:nobody
 
 # Run the compiled binary.
-ENTRYPOINT ["/srv/anpr/server/dashboard", "--http-listen-on=[::]:8080",\
-		   "--config-file=/srv/anpr/vault/config",\
-		   "--cookie-creds=/srv/anpr/vault/cookie-creds",\
-		   "--email-creds=/srv/anpr/vault/email-creds",\
-		   "--oauth-creds=/srv/anpr/vault/oauth-creds",\
-		   "--web-templates=/srv/anpr/server/templates/",\
-		   "--email-templates=/srv/anpr/server/emails/",\
-		   "--static-content=/srv/anpr/server/static/"]
+ENTRYPOINT ["/srv/anpr/server/dashboard",
+            "--http-listen-on=[::]:8080",\
+            "--config-file=/srv/anpr/vault/config",\
+            "--cookie-creds=/srv/anpr/vault/cookie-creds",\
+            "--email-creds=/srv/anpr/vault/email-creds",\
+            "--oauth-creds=/srv/anpr/vault/oauth-creds",\
+            "--web-templates=/srv/anpr/server/templates/",\
+            "--email-templates=/srv/anpr/server/emails/",\
+            "--static-content=/srv/anpr/server/static/"]
