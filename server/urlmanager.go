@@ -17,7 +17,7 @@ import (
 	"github.com/ccontavalli/goutils/scanner"
 	"github.com/ccontavalli/goutils/templates"
 	"github.com/gin-gonic/gin"
-	"github.com/hashicorp/go-immutable-radix"
+	iradix "github.com/hashicorp/go-immutable-radix"
 )
 
 type FileState struct {
@@ -299,7 +299,7 @@ func (um *UrlManager) Debug(c *gin.Context) {
 		fmt.Fprintf(&writer, "    index: score %d - %p\n", wl.IndexScore, wl.Index)
 		if wl.Index != nil {
 			fmt.Fprintf(&writer, "      fspath: %s\n", wl.Index.fspath)
-			fmt.Fprintf(&writer, "      config: %p - %s\n", wl.Index.config, wl.Index.config)
+			fmt.Fprintf(&writer, "      config: %p - %v\n", wl.Index.config, wl.Index.config)
 			fmt.Fprintf(&writer, "      renderer: %p\n", wl.Index.renderer)
 		}
 		fmt.Fprintf(&writer, "    dir: %p\n", wl.Dir)

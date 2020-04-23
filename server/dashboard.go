@@ -6,7 +6,7 @@ import (
 	"sort"
 	"time"
 
-	"github.com/paulmach/go.geojson"
+	geojson "github.com/paulmach/go.geojson"
 	"github.com/teamdigitale/anpr-dashboard-server/sqlite"
 	null "gopkg.in/guregu/null.v3"
 )
@@ -69,6 +69,34 @@ type DailyStats struct {
 	PopolazioneAire int       `json:"popolazione_aire"`
 }
 
+// AggrByRegion aggregate data type for regions
+type AggrByRegion struct {
+	Regione                    string `json:"regione"`
+	ComuniSubentro             int    `json:"comuni_subentro"`
+	PopolazioneSubentro        int    `json:"popolazione_subentro"`
+	PopolazioneAireSubentro    int    `json:"popolazione_aire_subentro"`
+	ComuniPreSubentro          int    `json:"comuni_presubentro"`
+	PopolazionePreSubentro     int    `json:"popolazione_presubentro"`
+	PopolazioneAirePreSubentro int    `json:"popolazione_aire_presubentro"`
+}
+
+// AggrByProvince aggregate data type for provinces
+type AggrByProvince struct {
+	Regione                    string `json:"regione"`
+	Provincia                  string `json:"provincia"`
+	ComuniSubentro             int    `json:"comuni_subentro"`
+	PopolazioneSubentro        int    `json:"popolazione_subentro"`
+	PopolazioneAireSubentro    int    `json:"popolazione_aire_subentro"`
+	ComuniPreSubentro          int    `json:"comuni_presubentro"`
+	PopolazionePreSubentro     int    `json:"popolazione_presubentro"`
+	PopolazioneAirePreSubentro int    `json:"popolazione_aire_presubentro`
+}
+
+type Aggregates struct {
+	AggrByProvinces []AggrByProvince `json:aggrByProvinces`
+	AggrByRegions   []AggrByRegion   `json:aggrByRegions`
+}
+
 func ConvertFromStat(name string, stats FornitoreStats) FornitoreSums {
 	totale := float64(stats.NumeroComuniInattivi + stats.NumeroComuniPresubentro + stats.NumeroComuniSubentro)
 	percentualeSubentrato := round((float64(stats.NumeroComuniSubentro) / totale) * 100.00)
@@ -91,10 +119,11 @@ type Summaries struct {
 	PopolazioneAirePreSubentro int `json:"pop_pre_aire"`
 }
 type DashBoardData struct {
-	Geojson   *geojson.FeatureCollection `json:"geojson"`
-	Summaries *Summaries                 `json:"summaries"`
-	Fornitori []FornitoreSums            `json:"fornitori"`
-	Charts    Charts                     `json:"charts"`
+	Geojson    *geojson.FeatureCollection `json:"geojson"`
+	Summaries  *Summaries                 `json:"summaries"`
+	Fornitori  []FornitoreSums            `json:"fornitori"`
+	Charts     Charts                     `json:"charts"`
+	Aggregates Aggregates                 `json:"aggregates"`
 }
 type Charts struct {
 	Subentro    []DailyStats `json:"subentro"`
@@ -217,6 +246,9 @@ func GetDashBoardData(comuni []sqlite.Comune) *DashBoardData {
 	charts := Charts{}
 	summaries := Summaries{}
 	fornitoriMap := make(map[string]FornitoreStats)
+	aggrByRegionMap := make(map[string]AggrByRegion)
+	aggrByProvinceMap := make(map[string]AggrByProvince)
+	aggregates := Aggregates{}
 
 	fc := geojson.NewFeatureCollection()
 
@@ -228,18 +260,61 @@ func GetDashBoardData(comuni []sqlite.Comune) *DashBoardData {
 	var inattivi []sqlite.Comune
 	//Populate the 2 heaps, one for comuni subentrati and the other for comuni in presubentro
 	for _, comune := range comuni {
+		aggrByRegion := AggrByRegion{Regione: comune.Region}
+		aggrByProvince := AggrByProvince{Regione: comune.Region, Provincia: comune.Province}
+
+		if _, ok := aggrByRegionMap[comune.Region]; ok {
+			aggrByRegion = aggrByRegionMap[comune.Region]
+		}
+
+		if _, ok := aggrByProvinceMap[comune.Province]; ok {
+			aggrByProvince = aggrByProvinceMap[comune.Province]
+		}
 
 		if comune.DataSubentro.Valid {
 			heap.Push(subentrati, comune)
+			aggrByRegion.ComuniSubentro++
+			aggrByRegion.PopolazioneSubentro += comune.Population
+			aggrByRegion.PopolazioneAireSubentro += comune.PopulationAIRE
+			aggrByRegionMap[comune.Region] = aggrByRegion
+
+			aggrByProvince.ComuniSubentro++
+			aggrByProvince.PopolazioneSubentro += comune.Population
+			aggrByProvince.PopolazioneAireSubentro += comune.PopulationAIRE
+			aggrByProvinceMap[comune.Province] = aggrByProvince
 			continue
 		}
 
 		if comune.DataPresubentro.Valid {
 			heap.Push(preSubentrati, comune)
+			aggrByRegion.ComuniPreSubentro++
+			aggrByRegion.PopolazionePreSubentro += comune.Population
+			aggrByRegion.PopolazioneAirePreSubentro += comune.PopulationAIRE
+			aggrByRegionMap[comune.Region] = aggrByRegion
+
+			aggrByProvince.ComuniPreSubentro++
+			aggrByProvince.PopolazionePreSubentro += comune.Population
+			aggrByProvince.PopolazioneAirePreSubentro += comune.PopulationAIRE
+			aggrByProvinceMap[comune.Province] = aggrByProvince
 			continue
 		}
 		inattivi = append(inattivi, comune)
 	}
+
+	// convert Region map to slice and populate aggregates struct
+	for _, val := range aggrByRegionMap {
+		aggregates.AggrByRegions = append(aggregates.AggrByRegions, val)
+	}
+
+	// convert Province map to slice and populate aggregates struct
+	for _, val := range aggrByProvinceMap {
+		//get the provincie map singleton
+		provincie := *GetProvincieMapInstance()
+		province := provincie.Map[val.Provincia].ProvinciaExt
+		val.Provincia = province
+		aggregates.AggrByProvinces = append(aggregates.AggrByProvinces, val)
+	}
+
 	//Iterates over the presubentrati and subentrati heap
 	for preSubentrati.Len() > 0 {
 		comune := heap.Pop(preSubentrati).(sqlite.Comune)
@@ -288,6 +363,7 @@ func GetDashBoardData(comuni []sqlite.Comune) *DashBoardData {
 
 	dashboardData.Fornitori = fornitori
 	dashboardData.Charts = charts
+	dashboardData.Aggregates = aggregates
 
 	return &dashboardData
 }
