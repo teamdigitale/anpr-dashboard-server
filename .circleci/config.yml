@@ -1,0 +1,52 @@
+# Javascript Node CircleCI 2.0 configuration file
+#
+# Check https://circleci.com/docs/2.0/ for more details
+#
+
+references:
+  working_directory: /src
+  defaults: &defaults
+    docker:
+      - image: golang:1.11-alpine
+
+  install_sw_requirements: &install_sw_requirements
+    run:
+      name: install_sw_requirements
+      command: |
+        apk add ca-certificates git openssh gcc libc-dev
+
+  get_dependencies: &get_dependencies
+    run:
+      name: get-dependencies
+      command: |
+        go get github.com/teamdigitale/anpr-dashboard-server/server
+        go get github.com/teamdigitale/anpr-dashboard-server/converter
+        go get github.com/stretchr/testify/assert
+
+  test: &test
+    run:
+      name: test
+      command: |
+        cd server && go test -race
+
+version: 2
+jobs:
+  test:
+    <<: *defaults
+    steps:
+      - checkout
+      - << : *install_sw_requirements
+      - << : *get_dependecies
+      - << : *test
+
+workflows:
+  version: 2
+  # For any branch other than master,
+  # run CI tests at each commit
+  on-commit-test:
+    jobs:
+      - test:
+          filters:
+            branches:
+              ignore:
+                - master
