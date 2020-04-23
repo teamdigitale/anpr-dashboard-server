@@ -93,8 +93,8 @@ type AggrByProvince struct {
 }
 
 type Aggregates struct {
-	AggrByProvinces []AggrByProvince `json:aggrByProvinces`
-	AggrByRegions   []AggrByRegion   `json:aggrByRegions`
+	AggrByProvinces []AggrByProvince `json:aggr_by_provinces`
+	AggrByRegions   []AggrByRegion   `json:aggr_by_regions`
 }
 
 func ConvertFromStat(name string, stats FornitoreStats) FornitoreSums {

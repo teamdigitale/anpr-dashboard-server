@@ -6,7 +6,7 @@
 #
 openapi: 3.0.2
 info:
-  version: "1.0.1"
+  version: "1.0.2"
   # Il `title` e' il nome del tuo prodotto/servizio!
   # E' la prima cosa ad apparire in pagine web e cataloghi.
   # Dev'essere chiaro e conciso.
@@ -248,6 +248,18 @@ components:
               type: array
               items:
                 $ref: '#/components/schemas/Chart'
+        aggregates:
+          type: object
+          properties:
+            aggr_by_provinces:
+              type: array
+              items:
+                $ref: '#/components/schemas/AggrByProvinces'
+            aggr_by_regions:
+              type: array
+              items:
+                $ref: '#/components/schemas/AggrByRegions'
+
     Chart:
       type: object
       properties:
@@ -267,6 +279,7 @@ components:
         - comuni
         - popolazione
         - popolazione_aire
+
     GeoJson:
       properties:
         type:
@@ -276,6 +289,7 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/GeoJsonFeature'
+
     GeoJsonFeature:
       description: |-
         Informazioni sul comune e sue coordinate geografiche.
@@ -288,6 +302,7 @@ components:
           $ref: https://geojson.org/schema/Point.json
         properties:
           $ref: '#/components/schemas/Properties'
+
     Fornitori:
       type: object
       properties:
@@ -300,7 +315,6 @@ components:
         percentuale_comuni_inattivi:
           type: integer
           format: int32
-
         nome:
           type: string
       required:
@@ -308,6 +322,7 @@ components:
         - percentuale_comuni_in_presubentro
         - percentuale_comuni_inattivi
         - nome
+
     Properties:
       description: |
         Informazioni sullo stato di migrazione ANPR del comune.
@@ -378,6 +393,7 @@ components:
           format: date-time
         PianificazioneIntervalloSubentro:
           $ref: '#/components/schemas/IntervalloSubentro'
+
     IntervalloSubentro:
       properties:
         From:
@@ -393,4 +409,57 @@ components:
           type: string
           default: null
 
+    AggrByProvinces:
+      type: object
+      properties:
+        regione:
+          type: string
+        provincia:
+          type: string
+        comuni_subentro:
+          type: int32
+        popolazione_subentro:
+          type: int32
+        popolazione_aire_subentro:
+          type: int32
+        comuni_presubentro:
+          type: int32
+        popolazione_presubentro:
+          type: int32
+        popolazione_aire_presubentro:
+          type: int32
+      required:
+        - regione
+        - provincia
+        - comuni_subentro
+        - popolazione_subentro
+        - popolazione_aire_subentro
+        - comuni_presubentro
+        - popolazione_presubentro
+        - popolazione_aire_presubentro
 
+    AggrByRegions:
+      type: object
+      properties:
+        regione:
+          type: string
+        comuni_subentro:
+          type: int32
+        popolazione_subentro:
+          type: int32
+        popolazione_aire_subentro:
+          type: int32
+        comuni_presubentro:
+          type: int32
+        popolazione_presubentro:
+          type: int32
+        popolazione_aire_presubentro:
+          type: int32
+      required:
+        - regione
+        - comuni_subentro
+        - popolazione_subentro
+        - popolazione_aire_subentro
+        - comuni_presubentro
+        - popolazione_presubentro
+        - popolazione_aire_presubentro
