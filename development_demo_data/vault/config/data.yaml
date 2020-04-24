@@ -1,0 +1,62 @@
+hostnames:
+  - dashboard.anpr.it
+options:
+  sslcachedir: /opt/dashboard/sslcache/
+  paths:
+    /srv/anpr/site/static/:
+      viewers:
+        - team_anpr
+        - team_anpr_readers
+storageoptions:
+  databasepath: /srv/anpr/db/db.sqlite
+  checkdatalistpath: /var/cache/dashboard_scripts/anpr/DatiCheckListV3.3.xml
+  vocabularies: /srv/anpr/db/
+  anomalieschedesoggettopath: /var/cache/dashboard_scripts/anpr/AnomalieSchedeSoggettoPreSubV.2.xml
+  notifyemail:
+    - fake-email@teamdigitale.governo.it
+  fornitoriacls:
+    SUPPLIER ONE:
+      readers:
+        - supplier_one_reader_one
+        - supplier_one_reader_two
+        - team_anpr_readers
+      writers:
+        - supplier_one_writer_one
+        - team_anpr
+    SUPPLIER TWO:
+      readers:
+        - supplier_two_reader_one
+        - team_anpr_readers
+      writers:
+        - supplier_two_writer_one
+        - supplier_two_writer_two
+        - team_anpr
+groups:
+  - id: team_anpr
+    members:
+      - teammemberone@teamdigitale.governo.it
+      - teammembertwo@teamdigitale.governo.it
+      - teammemberthree@teamdigitale.governo.it
+  - id: team_anpr_readers
+    apikeys:
+      - XXXXXX-XXX-XXXX-XXX-XXXXXXXXXXXX
+    members:
+      - '@teamdigitale.governo.it'
+  - id: supplier_one_reader_one
+    members:
+      - fakeemail@supplieronereaderone.it
+  - id: supplier_one_reader_two
+    members:
+      - fakeemail@supplieronereadertwo.it
+  - id: supplier_one_writer_one
+    members:
+      - fakeemail@supplieronewriterone.it
+  - id: supplier_two_reader_one
+    members:
+      - fakeemail@suppliertworeaderone.it
+  - id: supplier_two_writer_one
+    members:
+      - fakeemail@suppliertwowriterone.it
+  - id: supplier_two_writer_two
+    members:
+      - fakeemail@suppliertwowritertwo.it
