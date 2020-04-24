@@ -417,17 +417,23 @@ components:
         provincia:
           type: string
         comuni_subentro:
-          type: int32
+          type: integer
+          format: int32
         popolazione_subentro:
-          type: int32
+          type: integer
+          format: int32
         popolazione_aire_subentro:
-          type: int32
+          type: integer
+          format: int32
         comuni_presubentro:
-          type: int32
+          type: integer
+          format: int32
         popolazione_presubentro:
-          type: int32
+          type: integer
+          format: int32
         popolazione_aire_presubentro:
-          type: int32
+          type: integer
+          format: int32
       required:
         - regione
         - provincia
@@ -444,17 +450,23 @@ components:
         regione:
           type: string
         comuni_subentro:
-          type: int32
+          type: integer
+          format: int32
         popolazione_subentro:
-          type: int32
+          type: integer
+          format: int32
         popolazione_aire_subentro:
-          type: int32
+          type: integer
+          format: int32
         comuni_presubentro:
-          type: int32
+          type: integer
+          format: int32
         popolazione_presubentro:
-          type: int32
+          type: integer
+          format: int32
         popolazione_aire_presubentro:
-          type: int32
+          type: integer
+          format: int32
       required:
         - regione
         - comuni_subentro
