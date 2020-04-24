@@ -89,12 +89,12 @@ type AggrByProvince struct {
 	PopolazioneAireSubentro    int    `json:"popolazione_aire_subentro"`
 	ComuniPreSubentro          int    `json:"comuni_presubentro"`
 	PopolazionePreSubentro     int    `json:"popolazione_presubentro"`
-	PopolazioneAirePreSubentro int    `json:"popolazione_aire_presubentro`
+	PopolazioneAirePreSubentro int    `json:"popolazione_aire_presubentro"`
 }
 
 type Aggregates struct {
-	AggrByProvinces []AggrByProvince `json:aggr_by_provinces`
-	AggrByRegions   []AggrByRegion   `json:aggr_by_regions`
+	AggrByProvinces []AggrByProvince `json:"aggr_by_provinces"`
+	AggrByRegions   []AggrByRegion   `json:"aggr_by_regions"`
 }
 
 func ConvertFromStat(name string, stats FornitoreStats) FornitoreSums {
