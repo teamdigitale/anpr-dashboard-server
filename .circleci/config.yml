@@ -7,7 +7,7 @@ references:
   working_directory: /src
   defaults: &defaults
     docker:
-      - image: golang:1.11-alpine
+      - image: golang:1.13
 
   install_sw_requirements: &install_sw_requirements
     run:
