@@ -1,9 +1,9 @@
 # Accept the Go version for the image to be set as a build argument.
-# Default to Go 1.11
-ARG GO_VERSION=1.11
+# Default to Go 1.13
+ARG GO_VERSION=1.13
 
 # First stage: build the executable.
-FROM golang:${GO_VERSION}-alpine AS builder
+FROM golang:${GO_VERSION} AS builder
 
 # Install the Certificate-Authority certificates for the app to be able to make
 # calls to HTTPS endpoints.
