@@ -13,7 +13,7 @@ references:
     run:
       name: install_sw_requirements
       command: |
-        apk add ca-certificates git openssh gcc libc-dev
+        apt install -y ca-certificates git openssh gcc libc-dev
 
   get_dependencies: &get_dependencies
     run:
