@@ -29,6 +29,9 @@ const (
 	REACTIVE        = "ReactiveEmailAlert"
 	kDatabaseSchema = `
 
+CREATE TABLE IF NOT EXISTS LASTUPDATE (
+ TIMESTAMP INTEGER PRIMARY KEY
+);
 
 CREATE TABLE IF NOT EXISTS SUBENTRO (
  ID_COMUNE INTEGER NOT NULL,
@@ -144,6 +147,9 @@ type Responsible struct {
 	Phone   string
 	Mobile  string
 	Email   string
+}
+type LastUpdate struct {
+	Timestamp int64 `json:"timestamp"`
 }
 type Fornitore struct {
 	Id    int `json:"id"`
@@ -874,6 +880,55 @@ func IsPresent(db *sql.DB, sqlSelect string) bool {
 
 	return nResult > 0
 
+}
+
+func GetLastUpdate(db *sql.DB) LastUpdate {
+	_, err := db.Begin()
+	if err != nil {
+		panic(err)
+	}
+
+	rows, err := db.Query("SELECT TIMESTAMP FROM LASTUPDATE")
+	if err != nil {
+		panic(err)
+	}
+	defer rows.Close()
+	lastUpdate := LastUpdate{}
+
+	for rows.Next() {
+		var dateTime int64
+
+		if err := rows.Scan(&dateTime); err != nil {
+			panic(err)
+		}
+		lastUpdate.Timestamp = dateTime
+	}
+	return lastUpdate
+}
+
+func SaveOrUpdateLastUpdate(db *sql.DB, time int64) {
+	tx, err := db.Begin()
+	if err != nil {
+		panic(err)
+	}
+
+	var saveOrUpdateSQL = "INSERT INTO LASTUPDATE (TIMESTAMP) VALUES (?)"
+	if IsPresent(db, "SELECT TIMESTAMP FROM LASTUPDATE") {
+		saveOrUpdateSQL = "UPDATE LASTUPDATE SET TIMESTAMP = ?"
+	}
+
+	stmt, err := tx.Prepare(saveOrUpdateSQL)
+
+	if err != nil {
+		panic(err)
+	}
+	_, err = stmt.Exec(time)
+	if err != nil {
+		panic(err)
+	}
+
+	defer stmt.Close()
+	tx.Commit()
 }
 
 // to avoid to resend mails on reloads
