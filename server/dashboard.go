@@ -124,6 +124,7 @@ type DashBoardData struct {
 	Fornitori  []FornitoreSums            `json:"fornitori"`
 	Charts     Charts                     `json:"charts"`
 	Aggregates Aggregates                 `json:"aggregates"`
+	LastUpdate int64                      `json:"last_update"`
 }
 type Charts struct {
 	Subentro    []DailyStats `json:"subentro"`
@@ -241,7 +242,7 @@ func (charts *Charts) updateHistoricalSequence() {
 		}
 	}
 }
-func GetDashBoardData(comuni []sqlite.Comune) *DashBoardData {
+func GetDashBoardData(comuni []sqlite.Comune, lastUpdate sqlite.LastUpdate) *DashBoardData {
 	dashboardData := DashBoardData{}
 	charts := Charts{}
 	summaries := Summaries{}
@@ -249,6 +250,7 @@ func GetDashBoardData(comuni []sqlite.Comune) *DashBoardData {
 	aggrByRegionMap := make(map[string]AggrByRegion)
 	aggrByProvinceMap := make(map[string]AggrByProvince)
 	aggregates := Aggregates{}
+	dashboardData.LastUpdate = lastUpdate.Timestamp
 
 	fc := geojson.NewFeatureCollection()
 

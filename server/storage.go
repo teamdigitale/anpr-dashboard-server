@@ -351,7 +351,10 @@ func (manager *StorageManager) GetSubentroInfo(ctx *gin.Context) {
 
 func (manager *StorageManager) GetFullDashboardData(ctx *gin.Context) {
 
-	ctx.JSON(200, GetDashBoardData(sqlite.SearchComuni(manager.db, sqlite.SearchFilter{})))
+	ctx.JSON(200, GetDashBoardData(
+		sqlite.SearchComuni(manager.db, sqlite.SearchFilter{}),
+		sqlite.GetLastUpdate(manager.db),
+	))
 	/*,
 
 	sqlite.SearchFilter{
@@ -819,6 +822,11 @@ func (manager *StorageManager) RunPeriodicRoutines() {
 	for {
 		manager.UpdateComuniCheckList()
 		manager.UpdateAnomalieSchedeSoggetto()
+		// update last_update field in db
+		sqlite.SaveOrUpdateLastUpdate(
+			manager.db,
+			time.Now().Unix(),
+		)
 		time.Sleep(manager.periodic_routines_interval)
 	}
 }
