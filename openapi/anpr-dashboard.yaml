@@ -16,7 +16,7 @@ info:
     Informazioni sullo stato della migrazione ad ANPR.
   description: |
     #### Documentazione
-    ANPR è l'Anagrafe Nazionale della Popolazione Residente [anpr].
+    [ANPR] è l'Anagrafe Nazionale della Popolazione Residente.
 
     Con ANPR le amministrazioni possono dialogare in maniera efficiente
     tra di loro avendo una fonte unica e certa per i dati dei cittadini.
@@ -54,7 +54,7 @@ info:
 
     [//]: # (Riferimenti)
 
-    [anpr]: https://anpr.interno.it/
+    [ANPR]: https://anpr.interno.it/
     [stato-migrazione]: https://stato-migrazione.anpr.it
     [sorgenti]: https://github.com/teamdigitale/anpr-dashboard-server
 
