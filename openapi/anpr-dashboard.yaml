@@ -350,6 +350,9 @@ components:
           type: string
         ultima_data_subentro:
           type: string
+        codice_istat:
+          type: string
+          pattern: '[0-9]+'
       required:
         - PROVINCIA
         - REGIONE

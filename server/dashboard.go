@@ -179,6 +179,8 @@ func toFeature(comune sqlite.Comune) *geojson.Feature {
 	feature.SetProperty("label", comune.Name)
 	feature.SetProperty("PROVINCIA", provincie.Map[comune.Province].ProvinciaExt)
 	feature.SetProperty("REGIONE", comune.Region)
+	feature.SetProperty("codice_istat", comune.CodiceIstat)
+
 	//TODO: Add zone mapping
 	feature.SetProperty("ZONA", provincie.Map[comune.Province].Zona)
 	feature.SetProperty("popolazione", comune.Population)

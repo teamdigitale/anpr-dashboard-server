@@ -79,6 +79,7 @@ func TestGetGetDashBoardData(t *testing.T) {
 	assert.Equal(t, "31/08/2019", feature2.Properties["data_subentro"])
 	assert.Nil(t, feature2.Properties["data_presubentro"])
 
+	assert.NotNil(t, dashboardData.Geojson.Features[0].Properties["codice_istat"])
 	assert.NotEmpty(t, dashboardData.Charts)
 	assert.NotEmpty(t, dashboardData.Fornitori)
 	assert.NotEmpty(t, dashboardData.Geojson)
