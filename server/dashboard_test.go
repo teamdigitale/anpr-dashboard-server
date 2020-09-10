@@ -51,6 +51,8 @@ var comuni = []sqlite.Comune{
 	buildComuneFrom("Comune4", "Regione2", "00147", "PC", 1567234800, -1, 46.3595112, 12.7890789, fornitori[0]),
 }
 
+var lastUpdate = sqlite.LastUpdate{1599751219}
+
 func TestDateFormatting(t *testing.T) {
 	InitServerConfigFromFile("./tools/config.sample.yaml")
 	var date = dateFormattedOrNull(comuni[1].DataSubentro)
@@ -58,7 +60,7 @@ func TestDateFormatting(t *testing.T) {
 }
 func TestGetGetDashBoardData(t *testing.T) {
 	InitServerConfigFromFile("./tools/config.sample.yaml")
-	var dashboardData = GetDashBoardData(comuni)
+	var dashboardData = GetDashBoardData(comuni, lastUpdate)
 	assert.Len(t, dashboardData.Geojson.Features, 4)
 
 	feature1 := dashboardData.Geojson.Features[0]
