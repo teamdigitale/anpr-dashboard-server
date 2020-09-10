@@ -13,7 +13,7 @@ references:
     run:
       name: install_sw_requirements
       command: |
-        apt install -y ca-certificates git openssh gcc libc-dev
+        apt install -y ca-certificates gcc libc-dev
 
   get_dependencies: &get_dependencies
     run:
@@ -27,7 +27,8 @@ references:
     run:
       name: test
       command: |
-        cd server && go test -race
+        go test -race ./server
+        go test -race ./sqlite
 
 version: 2
 jobs:
