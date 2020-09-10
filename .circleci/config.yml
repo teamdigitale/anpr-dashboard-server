@@ -35,9 +35,9 @@ jobs:
     <<: *defaults
     steps:
       - checkout
-      - << : *install_sw_requirements
-      - << : *get_dependecies
-      - << : *test
+      - <<: *install_sw_requirements
+      - <<: *get_dependencies
+      - <<: *test
 
 workflows:
   version: 2
