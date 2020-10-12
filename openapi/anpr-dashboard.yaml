@@ -65,7 +65,8 @@ info:
   # Chi posso contattare per informazioni sul servizio e sul suo stato?
   contact:
     email: roberto@teamdigitale.governo.it
-    name: Roberto Polli
+    name: Dipartimento per la Trasformazione Digitale
+    url: https://innovazione.gov.it
   x-project: anpr
   # L'audience delle API. Attualmente e' definito solamente
   #   la tipologia `public`.
