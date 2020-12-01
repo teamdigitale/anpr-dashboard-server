@@ -18,6 +18,12 @@ Change the supplier name (*fornitore*) for a given municipality (*comune*).
 UPDATE COMUNE SET ID_FORNITORE = (SELECT ID FROM FORNITORE WHERE  UPPER(FORNITORE.NAME)="AP SYSTEMS") WHERE COMUNE.NAME="CARATE BRIANZA";
 ```
 
+Add a "referente" for a given "fornitore".
+```sql
+INSERT INTO REFERENTI (ID, NAME, EMAIL_REFERENTE) VALUES((SELECT ID FROM FORNITORE WHERE NAME="Accenture S.p.A."), "Accenture S.p.A.", "email@example.tld");
+```
+Please note above operation must be done in config file too.
+
 Extract the municipality takeover plan
 
 ```sql
