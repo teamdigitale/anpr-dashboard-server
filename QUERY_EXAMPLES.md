@@ -82,8 +82,20 @@ VALUES("TRIBIANO", 22, "MI", "015222", 2, 3535, "LOMBARDIA", 45.4126596, 9.36730
 
 Update the takeover dates for a specific municipality
 
+Verify first if Comune exists and ID is correctly returned
 ```sql
-UPDATE SUBENTRO
-SET RANGE_FROM=strftime('%s','2017-11-30'), RANGE_TO=strftime('%s','2017-11-30'), FINAL_DATE=strftime('%s','2017-11-27')
-WHERE ID_COMUNE=(SELECT ID FROM COMUNE WHERE NAME="CASTELLEONE");
+SELECT ID FROM COMUNE WHERE NAME="CASTELLEONE";
+```
+Then, verify if exists in SUBENTRO table
+```sql
+select * from SUBENTRO WHERE ID_COMUNE=(SELECT ID FROM COMUNE WHERE NAME="CASTELLEONE");
+```
+
+if so, run:
+```sql
+UPDATE SUBENTRO SET RANGE_FROM=strftime('%s','2020-12-22'), RANGE_TO=strftime('%s','2020-12-22'), FINAL_DATE=strftime('%s','2020-12-22') WHERE ID_COMUNE=(SELECT ID FROM COMUNE WHERE NAME="CASTELLEONE");
+```
+if not, run:
+```sql
+INSERT into SUBENTRO (ID_COMUNE, RANGE_FROM, RANGE_TO, FINAL_DATE) VALUES((SELECT ID FROM COMUNE WHERE NAME="CASTELLEONE"), strftime('%s','2020-12-22'),strftime('%s','2020-12-22'),strftime('%s','2020-12-22'));
 ```
