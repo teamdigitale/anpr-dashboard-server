@@ -61,7 +61,7 @@ info:
   # I termini del servizio contengono un riferimento
   #   a tutte le indicazioni e le note legali per l'utilizzo
   #   del servizio, inclusi gli eventuali riferimenti utili al GDPR.
-  termsOfService: https://dashboard.anpr.it
+  termsOfService: https://developers.italia.it/it/note-legali
   # Chi posso contattare per informazioni sul servizio e sul suo stato?
   contact:
     email: tech@teamdigitale.governo.it
